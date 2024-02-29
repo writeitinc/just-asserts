@@ -18,7 +18,7 @@ EXAMPLE_OBJ_DIR = $(OBJ_DIR)/examples
 
 BIN_DIR = $(BUILD_DIR)/bin
 
-BINARIES =
+BINARIES = $(BIN_DIR)/ex-assert
 
 .PHONY: default
 default: release
