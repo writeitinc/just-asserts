@@ -45,8 +45,8 @@ void ja__error(const char *file, unsigned int line, const char *func, const char
 # include <stdio.h>
 # include <stdlib.h>
 
-void ja__report(const char *report_type, const char *file, unsigned int line, const char *func,
-		const char *fmt, va_list va_args);
+static void ja__report(const char *report_type, const char *file, unsigned int line,
+		const char *func, const char *fmt, va_list va_args);
 
 void ja__warn(const char *file, unsigned int line, const char *func, const char *fmt, ...)
 {
