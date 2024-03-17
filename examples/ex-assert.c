@@ -1,5 +1,5 @@
 #define JA_IMPLEMENTATION
-#include <just-asserts/just-asserts.h>
+#include <just-asserts/ja-runtime-asserts.h>
 
 int main(void)
 {
