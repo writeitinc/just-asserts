@@ -56,4 +56,25 @@
 		ja__report(__VA_ARGS__), \
 		ja__report_char('\n'))
 
+#define JA_CAST(T, v) (JA_TYPE(T))(v)
+#define JA_TYPE(T) JA__CAT(JA_TYPE_, T)
+#define JA_PRI(T) JA__CAT(JA_PRI_, T)
+#define JA_PRI_ARGS(T, v) JA__CAT(JA_PRI_ARGS_, T)(v)
+#define JA_COMPARE(T, a, OP, b) JA__CAT(JA_COMPARE_, T)(a, OP, b)
+
+#define JA_TYPE_int int
+#define JA_COMPARE_int(a, OP, b) JA_COMPARE_ARITHMETIC(int, a, OP, b)
+#define JA_PRI_int "%d"
+#define JA_PRI_ARGS_int(v) (int)(v)
+
+#define JA_TYPE_float float
+#define JA_COMPARE_float(a, OP, b) JA_COMPARE_ARITHMETIC(float, a, OP, b)
+#define JA_PRI_float "%f"
+#define JA_PRI_ARGS_float(v) (float)(v)
+
+#define JA_COMPARE_ARITHMETIC(T, a, OP, b) ((JA_TYPE(T))(a) OP (JA_TYPE(T))(b))
+
+#define JA__CAT(a, b) JA__CAT_I(a, b)
+#define JA__CAT_I(a, b) a##b
+
 #endif // ja_runtime_asserts_h

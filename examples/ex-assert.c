@@ -17,5 +17,18 @@ int main(void)
 	ja_expect_msg(sizeof(long) == sizeof(int),
 			"Expected `long` and `int` to be the same size");
 
+#define ja_assert_comparison(T, a, OP, b) \
+	do { \
+		if (!JA_COMPARE(int, a, OP, b)) { \
+			ja__report_trace("err"); \
+			ja__report_msg("Failed assertion for comparison of type `" #T "`"); \
+			ja__report_msg("Assertion: `" #a "` " #OP " `" #b "`"); \
+			ja__report_msg("       ==> `" JA_PRI(T) "` " #OP " `" JA_PRI(T) "`", \
+					JA_CAST(T, a), JA_CAST(T, b)); \
+		} \
+	} while (0)
+
+	ja_assert_comparison(float, 8, !=, 3 + 5);
+
 	return 0;
 }
