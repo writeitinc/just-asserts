@@ -17,6 +17,17 @@
 
 // Implementations
 
+#define JA_TYPE__Bool _Bool
+#define JA_COMPARE__Bool(a, OP, b) JA_COMPARE_ARITHMETIC(a, OP, b)
+#define JA_EQUALS__Bool(a, b) JA_EQUALS_ARITHMETIC(a, b)
+#define JA_FMT__Bool "%s"
+#define JA_FMT_ARGS__Bool(v) ((v) ? "true" : "false")
+#define JA_TYPE_bool JA_TYPE__Bool
+#define JA_COMPARE_bool JA_COMPARE__Bool
+#define JA_EQUALS_bool JA_EQUALS__Bool
+#define JA_FMT_bool JA_FMT__Bool
+#define JA_FMT_ARGS_bool JA_FMT_ARGS__Bool
+
 #define JA_TYPE_char char
 #define JA_COMPARE_char(a, OP, b) JA_COMPARE_ARITHMETIC(a, OP, b)
 #define JA_EQUALS_char(a, b) JA_EQUALS_ARITHMETIC(a, b)
