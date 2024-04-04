@@ -7,8 +7,6 @@
 # define JA__DEBUG_ONLY(expr) (void)0
 #endif
 
-#define JA__TRACE __FILE__, __func__, __LINE__
-
 #define ja_assert(expr) ja_assert_msg(expr, "Failed assertion")
 #define ja_expect(expr) ja_expect_msg(expr, "Unmet expectation")
 #define ja_assert_msg(expr, ...) ((expr) \
@@ -31,9 +29,21 @@
 # define ja_assume_false(expr) (0)
 #endif
 
-void ja__assert_fail(const char *file, const char *func, unsigned int line, const char *fmt, ...);
-void ja__expect_fail(const char *file, const char *func, unsigned int line, const char *fmt, ...);
-void ja__report_trace(const char *severity, const char *file, const char *func, unsigned int line);
+typedef struct JATrace {
+	const char *file;
+	const char *func;
+	unsigned int line;
+} JATrace;
+
+#define JA__TRACE (JATrace){ \
+		.file = __FILE__, \
+		.func = __func__, \
+		.line = __LINE__, \
+	}
+
+void ja__assert_fail(JATrace trace, const char *fmt, ...);
+void ja__expect_fail(JATrace trace, const char *fmt, ...);
+void ja__report_trace(const char *severity, JATrace trace);
 void ja__report_line(const char *fmt, ...);
 
 #ifdef JA_IMPLEMENTATION
@@ -44,32 +54,32 @@ void ja__report_line(const char *fmt, ...);
 
 static void ja__report_line_va(const char *fmt, va_list va_args);
 
-void ja__assert_fail(const char *file, const char *func, unsigned int line, const char *fmt, ...)
+void ja__assert_fail(JATrace trace, const char *fmt, ...)
 {
 	va_list va_args;
 	va_start(va_args, fmt);
 
-	ja__report_trace("err", file, func, line);
+	ja__report_trace("err", trace);
 	ja__report_line_va(fmt, va_args);
 
 	va_end(va_args);
 	exit(EXIT_FAILURE);
 }
 
-void ja__expect_fail(const char *file, const char *func, unsigned int line, const char *fmt, ...)
+void ja__expect_fail(JATrace trace, const char *fmt, ...)
 {
 	va_list va_args;
 	va_start(va_args, fmt);
 
-	ja__report_trace("warn", file, func, line);
+	ja__report_trace("warn", trace);
 	ja__report_line_va(fmt, va_args);
 
 	va_end(va_args);
 }
 
-void ja__report_trace(const char *severity, const char *file, const char *func, unsigned int line)
+void ja__report_trace(const char *severity, JATrace trace)
 {
-	fprintf(stderr, "[ja:%s] <%s:%s:%u>\n", severity, file, func, line);
+	fprintf(stderr, "[ja:%s] <%s:%s:%u>\n", severity, trace.file, trace.func, trace.line);
 }
 
 void ja__report_line(const char *fmt, ...)
