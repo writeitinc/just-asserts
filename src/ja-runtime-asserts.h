@@ -204,8 +204,8 @@ void ja__report_comparison_fail(const char *type_str, const char *type_fmt,
 void ja__report_trace(JACheckType check_type, JATrace trace)
 {
 	const char *CHECK_TYPE_DIAGNOSTIC_STR[] = {
-		[JA__ASSERTION] = "err",
-		[JA__EXPECTATION] = "warn",
+		[JA__ASSERTION] = "assert",
+		[JA__EXPECTATION] = "expect",
 	};
 	ja__report("[ja:%s] <%s:%s:%u>\n", CHECK_TYPE_DIAGNOSTIC_STR[check_type],
 			trace.file, trace.func, trace.line);
