@@ -13,10 +13,10 @@
 #define ja_expect(expr) ja_expect_msg(expr, "Unmet expectation: `" #expr "`")
 #define ja_assert_msg(expr, ...) ((expr) \
 		? (void)0 \
-		: ja__assert_fail(JA__TRACE, __VA_ARGS__))
+		: ja__fail(JA__ASSERTION, JA__TRACE, __VA_ARGS__))
 #define ja_expect_msg(expr, ...) ((expr) \
 		? (void)0 \
-		: ja__expect_fail(JA__TRACE, __VA_ARGS__))
+		: ja__fail(JA__EXPECTATION, JA__TRACE, __VA_ARGS__))
 
 #define ja_dbg_assert(expr) JA__DEBUG_ONLY(ja_assert(expr))
 #define ja_dbg_assert_msg(expr, msg) JA__DEBUG_ONLY(ja_assert_msg(expr, msg))
@@ -35,29 +35,40 @@
 
 #define ja_assert_comparison(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
 		? (void)0 \
-		: ja__assert_comparison_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
+		: ja__comparison_fail(JA__ASSERTION, JA__TRACE, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_expect_comparison(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
 		? (void)0 \
-		: ja__expect_comparison_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
+		: ja__comparison_fail(JA__EXPECTATION, JA__TRACE, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
 #define ja_assert_eq(T, a, b) (JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__assert_eq_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+		: ja__eq_fail(JA__ASSERTION, JA__TRACE, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_expect_eq(T, a, b) (JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__expect_eq_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+		: ja__eq_fail(JA__EXPECTATION, JA__TRACE, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_assert_neq(T, a, b) (!JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__assert_neq_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+		: ja__neq_fail(JA__ASSERTION, JA__TRACE, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_expect_neq(T, a, b) (!JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__expect_neq_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+		: ja__neq_fail(JA__EXPECTATION, JA__TRACE, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
+
+typedef enum JACheckType {
+	JA__ASSERTION,
+	JA__EXPECTATION,
+} JACheckType;
 
 typedef struct JATrace {
 	const char *file;
@@ -71,24 +82,14 @@ typedef struct JATrace {
 		.line = __LINE__, \
 	}
 
-void ja__assert_fail(JATrace trace, const char *fmt, ...);
-void ja__expect_fail(JATrace trace, const char *fmt, ...);
-void ja__assert_comparison_fail(JATrace trace, const char *type_str, const char *type_fmt,
+void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...);
+void ja__comparison_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);
-void ja__expect_comparison_fail(JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *op_str, const char *expr_b_str,
-		... /* T res_a, T res_b */);
-void ja__assert_eq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+void ja__eq_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);
-void ja__expect_eq_fail(JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *expr_b_str,
-		... /* T res_a, T res_b */);
-void ja__assert_neq_fail(JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *expr_b_str,
-		... /* T res_a, T res_b */);
-void ja__expect_neq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+void ja__neq_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);
 
@@ -98,124 +99,91 @@ void ja__expect_neq_fail(JATrace trace, const char *type_str, const char *type_f
 #include <stdio.h>
 #include <stdlib.h>
 
+static const char *FAILURE_DESCRIPTIONS[] = {
+	[JA__ASSERTION] = "Failed assertion",
+	[JA__EXPECTATION] = "Unmet expectation",
+};
+
 static void ja__report_comparison_fail(const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *op_str, const char *expr_b_str,
 		va_list va_args);
-static void ja__report_trace(const char *severity, JATrace trace);
+static void ja__report_trace(JACheckType check_type, JATrace trace);
 static void ja__report_line(const char *fmt, ...);
 static void ja__report(const char *fmt, ...);
 static void ja__report_line_va(const char *fmt, va_list va_args);
 static void ja__report_va(const char *fmt, va_list va_args);
 static void ja__report_char(char c);
 
-void ja__assert_fail(JATrace trace, const char *fmt, ...)
+void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...)
 {
 	va_list va_args;
 	va_start(va_args, fmt);
 
-	ja__report_trace("err", trace);
+	ja__report_trace(check_type, trace);
 	ja__report_line_va(fmt, va_args);
 
 	va_end(va_args);
-	exit(EXIT_FAILURE);
+
+	if (check_type == JA__ASSERTION) {
+		exit(EXIT_FAILURE);
+	}
 }
 
-void ja__expect_fail(JATrace trace, const char *fmt, ...)
-{
-	va_list va_args;
-	va_start(va_args, fmt);
-
-	ja__report_trace("warn", trace);
-	ja__report_line_va(fmt, va_args);
-
-	va_end(va_args);
-}
-
-void ja__assert_comparison_fail(JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *op_str, const char *expr_b_str,
+void ja__comparison_fail(JACheckType check_type, JATrace trace, const char *type_str,
+		const char *type_fmt, const char *expr_a_str, const char *op_str,
+		const char *expr_b_str,
 		... /* T res_a, T res_b */)
 {
 	va_list va_args;
 	va_start(va_args, expr_b_str);
 
-	ja__report_trace("err", trace);
-	ja__report_line("Failed assertion for comparison of type `%s`", type_str);
+	ja__report_trace(check_type, trace);
+	ja__report_line("%s for comparison of type `%s`", FAILURE_DESCRIPTIONS[check_type],
+			type_str);
 	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, op_str, expr_b_str, va_args);
 
 	va_end(va_args);
-	exit(EXIT_FAILURE);
+
+	if (check_type == JA__ASSERTION) {
+		exit(EXIT_FAILURE);
+	}
 }
 
-void ja__expect_comparison_fail(JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *op_str, const char *expr_b_str,
-		... /* T res_a, T res_b */)
-{
-	va_list va_args;
-	va_start(va_args, expr_b_str);
-
-	ja__report_trace("warn", trace);
-	ja__report_line("Unmet expectation for comparison of type `%s`", type_str);
-	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, op_str, expr_b_str, va_args);
-
-	va_end(va_args);
-}
-
-void ja__assert_eq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+void ja__eq_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *expr_b_str,
 		... /* T res_a, T res_b */)
 {
 	va_list va_args;
 	va_start(va_args, expr_b_str);
 
-	ja__report_trace("err", trace);
-	ja__report_line("Failed assertion for equality of type `%s`", type_str);
+	ja__report_trace(check_type, trace);
+	ja__report_line("%s for equality of type `%s`", FAILURE_DESCRIPTIONS[check_type], type_str);
 	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "==", expr_b_str, va_args);
 
 	va_end(va_args);
-	exit(EXIT_FAILURE);
+
+	if (check_type == JA__ASSERTION) {
+		exit(EXIT_FAILURE);
+	}
 }
 
-void ja__expect_eq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+void ja__neq_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *expr_b_str,
 		... /* T res_a, T res_b */)
 {
 	va_list va_args;
 	va_start(va_args, expr_b_str);
 
-	ja__report_trace("warn", trace);
-	ja__report_line("Unmet expectation for equality of type `%s`", type_str);
-	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "==", expr_b_str, va_args);
-
-	va_end(va_args);
-}
-
-void ja__assert_neq_fail(JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *expr_b_str,
-		... /* T res_a, T res_b */)
-{
-	va_list va_args;
-	va_start(va_args, expr_b_str);
-
-	ja__report_trace("err", trace);
-	ja__report_line("Failed assertion for inequality of type `%s`", type_str);
+	ja__report_trace(check_type, trace);
+	ja__report_line("%s for inequality of type `%s`", FAILURE_DESCRIPTIONS[check_type],
+			type_str);
 	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "!=", expr_b_str, va_args);
 
 	va_end(va_args);
-	exit(EXIT_FAILURE);
-}
 
-void ja__expect_neq_fail(JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *expr_b_str,
-		... /* T res_a, T res_b */)
-{
-	va_list va_args;
-	va_start(va_args, expr_b_str);
-
-	ja__report_trace("warn", trace);
-	ja__report_line("Unmet expectation for inequality of type `%s`", type_str);
-	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "!=", expr_b_str, va_args);
-
-	va_end(va_args);
+	if (check_type == JA__ASSERTION) {
+		exit(EXIT_FAILURE);
+	}
 }
 
 void ja__report_comparison_fail(const char *type_str, const char *type_fmt,
@@ -233,9 +201,14 @@ void ja__report_comparison_fail(const char *type_str, const char *type_fmt,
 	ja__report_char('\n');
 }
 
-void ja__report_trace(const char *severity, JATrace trace)
+void ja__report_trace(JACheckType check_type, JATrace trace)
 {
-	ja__report("[ja:%s] <%s:%s:%u>\n", severity, trace.file, trace.func, trace.line);
+	const char *CHECK_TYPE_DIAGNOSTIC_STR[] = {
+		[JA__ASSERTION] = "err",
+		[JA__EXPECTATION] = "warn",
+	};
+	ja__report("[ja:%s] <%s:%s:%u>\n", CHECK_TYPE_DIAGNOSTIC_STR[check_type],
+			trace.file, trace.func, trace.line);
 }
 
 void ja__report_line(const char *fmt, ...)
