@@ -3,7 +3,7 @@
 
 #include "ja-templates.h"
 
-#if JA_DEBUG
+#ifdef JA_DEBUG
 # define JA__DEBUG_ONLY(expr) (expr)
 #else
 # define JA__DEBUG_ONLY(expr) (void)0
@@ -23,7 +23,7 @@
 #define ja_dbg_expect(expr) JA__DEBUG_ONLY(ja_expect(expr))
 #define ja_dbg_expect_msg(expr, msg) JA__DEBUG_ONLY(ja_expect_msg(expr, msg))
 
-#if JA_DEBUG
+#ifdef JA_DEBUG
 # define ja_assume_true(expr) (ja_expect_msg(expr, \
 		"False expression was assumed to be true: `" #expr "`"), (expr))
 # define ja_assume_false(expr) (ja_expect_msg(!(expr), \
