@@ -33,35 +33,35 @@
 # define ja_assume_false(expr) (0)
 #endif
 
-#define ja_assert_comparison(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
+#define ja_assert_cmp(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
 		? (void)0 \
-		: ja__comparison_fail(JA__ASSERTION, JA__TRACE, JA__GENERIC_COMPARISON, \
+		: ja__cmp_fail(JA__ASSERTION, JA__TRACE, JA__GENERIC_COMPARISON, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
-#define ja_expect_comparison(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
+#define ja_expect_cmp(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
 		? (void)0 \
-		: ja__comparison_fail(JA__EXPECTATION, JA__TRACE, JA__GENERIC_COMPARISON, \
+		: ja__cmp_fail(JA__EXPECTATION, JA__TRACE, JA__GENERIC_COMPARISON, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
 #define ja_assert_eq(T, a, b) (JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__comparison_fail(JA__ASSERTION, JA__TRACE, JA__EQUALITY, \
+		: ja__cmp_fail(JA__ASSERTION, JA__TRACE, JA__EQUALITY, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, "==", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_expect_eq(T, a, b) (JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__comparison_fail(JA__EXPECTATION, JA__TRACE, JA__EQUALITY, \
+		: ja__cmp_fail(JA__EXPECTATION, JA__TRACE, JA__EQUALITY, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, "==", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_assert_neq(T, a, b) (!JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__comparison_fail(JA__ASSERTION, JA__TRACE, JA__NON_EQUALITY, \
+		: ja__cmp_fail(JA__ASSERTION, JA__TRACE, JA__NON_EQUALITY, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, "!=", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_expect_neq(T, a, b) (!JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__comparison_fail(JA__EXPECTATION, JA__TRACE, JA__NON_EQUALITY, \
+		: ja__cmp_fail(JA__EXPECTATION, JA__TRACE, JA__NON_EQUALITY, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, "!=", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
@@ -89,7 +89,7 @@ typedef struct JATrace {
 	}
 
 void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...);
-void ja__comparison_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
+void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
 		const char *type_str, const char *type_fmt, const char *expr_a_str,
 		const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);
@@ -122,7 +122,7 @@ void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...)
 	}
 }
 
-void ja__comparison_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
+void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
 		const char *type_str, const char *type_fmt, const char *expr_a_str,
 		const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */)
