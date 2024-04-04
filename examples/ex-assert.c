@@ -18,5 +18,11 @@ int main(void)
 	ja_assert_comparison(float, 1.0f, !=, 1.5f);
 	ja_expect_comparison(int, 1.0f, !=, 1.5f); // runtime warning
 
+	ja_assert_eq(float, 1.0f, 1.0f);
+	ja_expect_eq(int, 2 + 2, 5); // runtime warning
+
+	ja_assert_neq(float, 1.0f, 1.5f);
+	ja_expect_neq(int, 1.0f, 1.5f); // runtime warning
+
 	return 0;
 }

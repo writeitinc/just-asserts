@@ -40,6 +40,23 @@
 		: ja__expect_comparison_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
+#define ja_assert_eq(T, a, b) (JA_EQUALS(T, a, b) \
+		? (void)0 \
+		: ja__assert_eq_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
+#define ja_expect_eq(T, a, b) (JA_EQUALS(T, a, b) \
+		? (void)0 \
+		: ja__expect_eq_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
+#define ja_assert_neq(T, a, b) (!JA_EQUALS(T, a, b) \
+		? (void)0 \
+		: ja__assert_neq_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
+#define ja_expect_neq(T, a, b) (!JA_EQUALS(T, a, b) \
+		? (void)0 \
+		: ja__expect_neq_fail(JA__TRACE, JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
+
 typedef struct JATrace {
 	const char *file;
 	const char *func;
@@ -59,6 +76,18 @@ void ja__assert_comparison_fail(JATrace trace, const char *type_str, const char 
 		... /* T res_a, T res_b */);
 void ja__expect_comparison_fail(JATrace trace, const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *op_str, const char *expr_b_str,
+		... /* T res_a, T res_b */);
+void ja__assert_eq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+		const char *expr_a_str, const char *expr_b_str,
+		... /* T res_a, T res_b */);
+void ja__expect_eq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+		const char *expr_a_str, const char *expr_b_str,
+		... /* T res_a, T res_b */);
+void ja__assert_neq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+		const char *expr_a_str, const char *expr_b_str,
+		... /* T res_a, T res_b */);
+void ja__expect_neq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+		const char *expr_a_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);
 
 #ifdef JA_IMPLEMENTATION
@@ -125,6 +154,64 @@ void ja__expect_comparison_fail(JATrace trace, const char *type_str, const char 
 	ja__report_trace("warn", trace);
 	ja__report_line("Unmet expectation for comparison of type `%s`", type_str);
 	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, op_str, expr_b_str, va_args);
+
+	va_end(va_args);
+}
+
+void ja__assert_eq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+		const char *expr_a_str, const char *expr_b_str,
+		... /* T res_a, T res_b */)
+{
+	va_list va_args;
+	va_start(va_args, expr_b_str);
+
+	ja__report_trace("err", trace);
+	ja__report_line("Failed assertion for equality of type `%s`", type_str);
+	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "==", expr_b_str, va_args);
+
+	va_end(va_args);
+	exit(EXIT_FAILURE);
+}
+
+void ja__expect_eq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+		const char *expr_a_str, const char *expr_b_str,
+		... /* T res_a, T res_b */)
+{
+	va_list va_args;
+	va_start(va_args, expr_b_str);
+
+	ja__report_trace("warn", trace);
+	ja__report_line("Unmet expectation for equality of type `%s`", type_str);
+	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "==", expr_b_str, va_args);
+
+	va_end(va_args);
+}
+
+void ja__assert_neq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+		const char *expr_a_str, const char *expr_b_str,
+		... /* T res_a, T res_b */)
+{
+	va_list va_args;
+	va_start(va_args, expr_b_str);
+
+	ja__report_trace("err", trace);
+	ja__report_line("Failed assertion for inequality of type `%s`", type_str);
+	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "!=", expr_b_str, va_args);
+
+	va_end(va_args);
+	exit(EXIT_FAILURE);
+}
+
+void ja__expect_neq_fail(JATrace trace, const char *type_str, const char *type_fmt,
+		const char *expr_a_str, const char *expr_b_str,
+		... /* T res_a, T res_b */)
+{
+	va_list va_args;
+	va_start(va_args, expr_b_str);
+
+	ja__report_trace("warn", trace);
+	ja__report_line("Unmet expectation for inequality of type `%s`", type_str);
+	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "!=", expr_b_str, va_args);
 
 	va_end(va_args);
 }
