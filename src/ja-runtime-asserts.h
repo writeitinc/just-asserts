@@ -35,40 +35,46 @@
 
 #define ja_assert_comparison(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
 		? (void)0 \
-		: ja__comparison_fail(JA__ASSERTION, JA__TRACE, \
+		: ja__comparison_fail(JA__ASSERTION, JA__TRACE, JA__GENERIC_COMPARISON, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_expect_comparison(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
 		? (void)0 \
-		: ja__comparison_fail(JA__EXPECTATION, JA__TRACE, \
+		: ja__comparison_fail(JA__EXPECTATION, JA__TRACE, JA__GENERIC_COMPARISON, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
 #define ja_assert_eq(T, a, b) (JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__eq_fail(JA__ASSERTION, JA__TRACE, \
-					JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+		: ja__comparison_fail(JA__ASSERTION, JA__TRACE, JA__EQUALITY, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, "==", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_expect_eq(T, a, b) (JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__eq_fail(JA__EXPECTATION, JA__TRACE, \
-					JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+		: ja__comparison_fail(JA__EXPECTATION, JA__TRACE, JA__EQUALITY, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, "==", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_assert_neq(T, a, b) (!JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__neq_fail(JA__ASSERTION, JA__TRACE, \
-					JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+		: ja__comparison_fail(JA__ASSERTION, JA__TRACE, JA__NON_EQUALITY, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, "!=", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 #define ja_expect_neq(T, a, b) (!JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__neq_fail(JA__EXPECTATION, JA__TRACE, \
-					JA_TYPE_STR(T), JA_FMT(T), #a, #b, \
+		: ja__comparison_fail(JA__EXPECTATION, JA__TRACE, JA__NON_EQUALITY, \
+					JA_TYPE_STR(T), JA_FMT(T), #a, "!=", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
 typedef enum JACheckType {
 	JA__ASSERTION,
 	JA__EXPECTATION,
 } JACheckType;
+
+typedef enum JAComparisonType {
+	JA__GENERIC_COMPARISON,
+	JA__EQUALITY,
+	JA__NON_EQUALITY,
+} JAComparisonType;
 
 typedef struct JATrace {
 	const char *file;
@@ -83,14 +89,9 @@ typedef struct JATrace {
 	}
 
 void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...);
-void ja__comparison_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *op_str, const char *expr_b_str,
-		... /* T res_a, T res_b */);
-void ja__eq_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *expr_b_str,
-		... /* T res_a, T res_b */);
-void ja__neq_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *expr_b_str,
+void ja__comparison_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
+		const char *type_str, const char *type_fmt, const char *expr_a_str,
+		const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);
 
 #ifdef JA_IMPLEMENTATION
@@ -99,14 +100,6 @@ void ja__neq_fail(JACheckType check_type, JATrace trace, const char *type_str, c
 #include <stdio.h>
 #include <stdlib.h>
 
-static const char *FAILURE_DESCRIPTIONS[] = {
-	[JA__ASSERTION] = "Failed assertion",
-	[JA__EXPECTATION] = "Unmet expectation",
-};
-
-static void ja__report_comparison_fail(const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *op_str, const char *expr_b_str,
-		va_list va_args);
 static void ja__report_trace(JACheckType check_type, JATrace trace);
 static void ja__report_line(const char *fmt, ...);
 static void ja__report(const char *fmt, ...);
@@ -129,66 +122,29 @@ void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...)
 	}
 }
 
-void ja__comparison_fail(JACheckType check_type, JATrace trace, const char *type_str,
-		const char *type_fmt, const char *expr_a_str, const char *op_str,
-		const char *expr_b_str,
+void ja__comparison_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
+		const char *type_str, const char *type_fmt, const char *expr_a_str,
+		const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */)
 {
 	va_list va_args;
 	va_start(va_args, expr_b_str);
 
-	ja__report_trace(check_type, trace);
-	ja__report_line("%s for comparison of type `%s`", FAILURE_DESCRIPTIONS[check_type],
-			type_str);
-	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, op_str, expr_b_str, va_args);
+	const char *FAILURE_DESCRIPTIONS[] = {
+		[JA__ASSERTION] = "Failed assertion",
+		[JA__EXPECTATION] = "Unmet expectation",
+	};
 
-	va_end(va_args);
-
-	if (check_type == JA__ASSERTION) {
-		exit(EXIT_FAILURE);
-	}
-}
-
-void ja__eq_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *expr_b_str,
-		... /* T res_a, T res_b */)
-{
-	va_list va_args;
-	va_start(va_args, expr_b_str);
+	const char *COMPARISON_TYPE_STR[] = {
+		[JA__GENERIC_COMPARISON] = "comparison",
+		[JA__EQUALITY] = "equality",
+		[JA__NON_EQUALITY] = "non-equality",
+	};
 
 	ja__report_trace(check_type, trace);
-	ja__report_line("%s for equality of type `%s`", FAILURE_DESCRIPTIONS[check_type], type_str);
-	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "==", expr_b_str, va_args);
+	ja__report_line("%s for %s of type `%s`", FAILURE_DESCRIPTIONS[check_type],
+			COMPARISON_TYPE_STR[cmp_type], type_str);
 
-	va_end(va_args);
-
-	if (check_type == JA__ASSERTION) {
-		exit(EXIT_FAILURE);
-	}
-}
-
-void ja__neq_fail(JACheckType check_type, JATrace trace, const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *expr_b_str,
-		... /* T res_a, T res_b */)
-{
-	va_list va_args;
-	va_start(va_args, expr_b_str);
-
-	ja__report_trace(check_type, trace);
-	ja__report_line("%s for inequality of type `%s`", FAILURE_DESCRIPTIONS[check_type],
-			type_str);
-	ja__report_comparison_fail(type_str, type_fmt, expr_a_str, "!=", expr_b_str, va_args);
-
-	va_end(va_args);
-
-	if (check_type == JA__ASSERTION) {
-		exit(EXIT_FAILURE);
-	}
-}
-
-void ja__report_comparison_fail(const char *type_str, const char *type_fmt,
-		const char *expr_a_str, const char *op_str, const char *expr_b_str, va_list va_args)
-{
 	// "        Assertion: (<expr_a>) <op> (<expr_b>)"
 	// "               ==> (<res_a>) <op> (<res_b>)"
 	ja__report_line("Assertion: (%s)(%s) %s (%s)(%s)", type_str, expr_a_str, op_str, type_str,
@@ -199,6 +155,12 @@ void ja__report_comparison_fail(const char *type_str, const char *type_fmt,
 	ja__report(" %s ", op_str);
 	ja__report_va(type_fmt, va_args);
 	ja__report_char('\n');
+
+	va_end(va_args);
+
+	if (check_type == JA__ASSERTION) {
+		exit(EXIT_FAILURE);
+	}
 }
 
 void ja__report_trace(JACheckType check_type, JATrace trace)
