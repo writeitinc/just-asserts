@@ -15,5 +15,8 @@ int main(void)
 	ja_expect_msg(sizeof(long) == sizeof(int),
 			"Expected `long` and `int` to be the same size");
 
+	ja_assert_comparison(float, 1.0f, !=, 1.5f);
+	ja_expect_comparison(int, 1.0f, !=, 1.5f); // runtime warning
+
 	return 0;
 }
