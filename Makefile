@@ -30,6 +30,7 @@ release: dirs headers $(BINARIES)
 .PHONY: debug
 debug: DEBUG = -fsanitize=address,undefined
 debug: OPTIM = -g
+debug: DEFINES = -DJA_DEBUG=1
 debug: dirs headers $(BINARIES)
 
 # library
