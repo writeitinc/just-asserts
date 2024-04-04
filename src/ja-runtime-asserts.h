@@ -9,8 +9,8 @@
 # define JA__DEBUG_ONLY(expr) (void)0
 #endif
 
-#define ja_assert(expr) ja_assert_msg(expr, "Failed assertion")
-#define ja_expect(expr) ja_expect_msg(expr, "Unmet expectation")
+#define ja_assert(expr) ja_assert_msg(expr, "Failed assertion: `" #expr "`")
+#define ja_expect(expr) ja_expect_msg(expr, "Unmet expectation: `" #expr "`")
 #define ja_assert_msg(expr, ...) ((expr) \
 		? (void)0 \
 		: ja__assert_fail(JA__TRACE, __VA_ARGS__))
