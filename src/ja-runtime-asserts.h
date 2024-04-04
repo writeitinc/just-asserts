@@ -60,10 +60,6 @@ void ja__assert_comparison_fail(JATrace trace, const char *type_str, const char 
 void ja__expect_comparison_fail(JATrace trace, const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);
-void ja__report_trace(const char *severity, JATrace trace);
-void ja__report_line(const char *fmt, ...);
-void ja__report(const char *fmt, ...);
-void ja__report_char(char c);
 
 #ifdef JA_IMPLEMENTATION
 
@@ -71,11 +67,15 @@ void ja__report_char(char c);
 #include <stdio.h>
 #include <stdlib.h>
 
-static void ja__report_line_va(const char *fmt, va_list va_args);
-static void ja__report_va(const char *fmt, va_list va_args);
 static void ja__report_comparison_fail(const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *op_str, const char *expr_b_str,
 		va_list va_args);
+static void ja__report_trace(const char *severity, JATrace trace);
+static void ja__report_line(const char *fmt, ...);
+static void ja__report(const char *fmt, ...);
+static void ja__report_line_va(const char *fmt, va_list va_args);
+static void ja__report_va(const char *fmt, va_list va_args);
+static void ja__report_char(char c);
 
 void ja__assert_fail(JATrace trace, const char *fmt, ...)
 {
