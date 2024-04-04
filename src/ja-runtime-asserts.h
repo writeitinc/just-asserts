@@ -45,6 +45,8 @@ void ja__assert_fail(JATrace trace, const char *fmt, ...);
 void ja__expect_fail(JATrace trace, const char *fmt, ...);
 void ja__report_trace(const char *severity, JATrace trace);
 void ja__report_line(const char *fmt, ...);
+void ja__report(const char *fmt, ...);
+void ja__report_char(char c);
 
 #ifdef JA_IMPLEMENTATION
 
@@ -53,6 +55,7 @@ void ja__report_line(const char *fmt, ...);
 #include <stdlib.h>
 
 static void ja__report_line_va(const char *fmt, va_list va_args);
+static void ja__report_va(const char *fmt, va_list va_args);
 
 void ja__assert_fail(JATrace trace, const char *fmt, ...)
 {
@@ -79,7 +82,7 @@ void ja__expect_fail(JATrace trace, const char *fmt, ...)
 
 void ja__report_trace(const char *severity, JATrace trace)
 {
-	fprintf(stderr, "[ja:%s] <%s:%s:%u>\n", severity, trace.file, trace.func, trace.line);
+	ja__report("[ja:%s] <%s:%s:%u>\n", severity, trace.file, trace.func, trace.line);
 }
 
 void ja__report_line(const char *fmt, ...)
@@ -94,9 +97,29 @@ void ja__report_line(const char *fmt, ...)
 
 void ja__report_line_va(const char *fmt, va_list va_args)
 {
-	putc('\t', stderr);
+	ja__report_char('\t');
+	ja__report_va(fmt, va_args);
+	ja__report_char('\n');
+}
+
+void ja__report(const char *fmt, ...)
+{
+	va_list va_args;
+	va_start(va_args, fmt);
+
+	ja__report_va(fmt, va_args);
+
+	va_end(va_args);
+}
+
+void ja__report_va(const char *fmt, va_list va_args)
+{
 	vfprintf(stderr, fmt, va_args);
-	putc('\n', stderr);
+}
+
+void ja__report_char(char c)
+{
+	putc(c, stderr);
 }
 
 #endif // JA_IMPLEMENTATION
