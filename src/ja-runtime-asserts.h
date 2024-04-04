@@ -147,8 +147,7 @@ void ja__comparison_fail(JACheckType check_type, JATrace trace, JAComparisonType
 
 	// "        Assertion: (<expr_a>) <op> (<expr_b>)"
 	// "               ==> (<res_a>) <op> (<res_b>)"
-	ja__report_line("Assertion: (%s)(%s) %s (%s)(%s)", type_str, expr_a_str, op_str, type_str,
-			expr_b_str);
+	ja__report_line("Assertion: %s %s %s", expr_a_str, op_str, expr_b_str);
 	ja__report_char('\t');
 	ja__report("       ==> ");
 	ja__report_va(type_fmt, va_args);
