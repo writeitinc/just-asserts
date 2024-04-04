@@ -24,8 +24,10 @@
 #define ja_dbg_expect_msg(expr, msg) JA__DEBUG_ONLY(ja_expect_msg(expr, msg))
 
 #if JA_DEBUG
-# define ja_assume_true(expr) (ja_dbg_expect_msg((expr), "Unmet assumption"), (expr))
-# define ja_assume_false(expr) (ja_dbg_expect_msg(!(expr), "Unmet assumption"), (expr))
+# define ja_assume_true(expr) (ja_dbg_expect_msg(expr, \
+		"False expression was assumed to be true: `" #expr "`"), (expr))
+# define ja_assume_false(expr) (ja_dbg_expect_msg(!(expr), \
+		"True expression was assumed to be false: `" #expr "`"), (expr))
 #else
 # define ja_assume_true(expr) (1)
 # define ja_assume_false(expr) (0)
