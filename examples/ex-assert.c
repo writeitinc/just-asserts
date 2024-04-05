@@ -1,3 +1,4 @@
+#define JA_INCLUDE_STD_HEADERS
 #define JA_IMPLEMENTATION
 #include <just-asserts/ja-runtime-asserts.h>
 
@@ -37,6 +38,12 @@ int main(void)
 	Vec2D vec = { 2, 1.5 };
 	ja_expect_eq(Vec2D, vec, ((Vec2D){ 2, 1.5 })); // compound literals require parentheses
 	ja_expect_eq(Vec2D, ((Vec2D){ 1, 2 }), ((Vec2D){ 2, 1 })); // runtime warning
+
+	ja_expect_eq(ptr, &vec, &vec.x);
+	ja_expect_eq(ptr, &vec, &vec.y); // runtime warning
+
+	ja_expect_eq(cstr, "deadbeef", "deadbeef");
+	ja_expect_eq(cstr, "deadbeef", "feedbeef");
 
 	return 0;
 }

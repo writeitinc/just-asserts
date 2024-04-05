@@ -110,6 +110,19 @@
 #define JA_FMT_long_double "%Lf"
 #define JA_FMT_ARGS_long_double(v) (long double)(v)
 
+#define JA_TYPE_ptr void *
+#define JA_COMPARE_ptr(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(void *, a, OP, b)
+#define JA_EQUALS_ptr(a, b) JA_CASTED_EQUALS_ARITHMETIC(void *, a, b)
+#define JA_FMT_ptr "%p"
+#define JA_FMT_ARGS_ptr(v) (void *)(v)
+
+int strcmp(const char *a, const char *b);
+#define JA_TYPE_cstr const char *
+#define JA_COMPARE_cstr(a, OP, b) (strcmp(a, b) OP 0)
+#define JA_EQUALS_cstr(a, b) (strcmp(a, b) == 0)
+#define JA_FMT_cstr "\"%s\""
+#define JA_FMT_ARGS_cstr(v) (const char *)(v)
+
 #define JA_COMPARE_ARITHMETIC(a, OP, b) ((a) OP (b))
 #define JA_EQUALS_ARITHMETIC(a, b) ((a) == (b))
 #define JA_CASTED_COMPARE_ARITHMETIC(T, a, OP, b) ((T)(a) OP (T)(b))
