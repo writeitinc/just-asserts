@@ -12,6 +12,9 @@ typedef struct Vec2D {
 #define JA_FMT_Vec2D "[%g, %g]"
 #define JA_FMT_ARGS_Vec2D(v) (v).x, (v).y
 
+#include <stdlib.h>
+#include <time.h>
+
 int main(void)
 {
 	ja_assert(1);
@@ -44,6 +47,17 @@ int main(void)
 
 	ja_expect_eq(cstr, "deadbeef", "deadbeef");
 	ja_expect_eq(cstr, "deadbeef", "feedbeef");
+
+	ja_expect_neq(double_complex, 2.0+1.5*I, 2.0+1.5*I);
+	ja_expect_neq(float_complex, 2.0f+1.5f*I, 2.0f+1.5f*I);
+	ja_expect_neq(long_double_complex, 2.0l+1.5l*I, 2.0l+1.5l*I);
+
+	struct tm local_tz_time = *localtime(&(time_t){ time(NULL) });
+	struct tm utc_time = *gmtime(&(time_t){ time(NULL) });
+	ja_expect_eq(struct_tm, local_tz_time, utc_time);
+
+	ja_expect_eq(div_t, div(8, 3), div(12, 5));
+	ja_expect_eq(div_t, div(8, 3), div(12, 7));
 
 	return 0;
 }
