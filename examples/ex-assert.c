@@ -1,4 +1,3 @@
-#define JA_IMPLEMENTATION
 #include <just-asserts/ja-runtime-asserts.h>
 
 typedef struct Vec2D {
