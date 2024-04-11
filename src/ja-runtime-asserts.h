@@ -1,3 +1,12 @@
+/*
+ * Before including this header, you may want to define the following macros:
+ * - JA_DEBUG:
+ *       Enables debug-only asserts.
+ * - JA_IMPLEMENTATION:
+ *       The library will place objects and functions with external linkage should be placed in the
+ *       current translation unit. This allows `just-asserts` to be used as a header-only library.
+ */
+
 #ifndef ja_runtime_asserts_h
 #define ja_runtime_asserts_h
 
