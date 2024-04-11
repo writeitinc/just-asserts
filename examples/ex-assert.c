@@ -1,4 +1,3 @@
-#define JA_INCLUDE_STD_HEADERS
 #define JA_IMPLEMENTATION
 #include <just-asserts/ja-runtime-asserts.h>
 
