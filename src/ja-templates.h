@@ -47,20 +47,20 @@
 #define JA_TYPE_char char
 #define JA_COMPARE_char(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(char, a, OP, b)
 #define JA_EQUALS_char(a, b) JA_CASTED_EQUALS_ARITHMETIC(char, a, b)
-#define JA_FMT_char "%c"
-#define JA_FMT_ARGS_char(v) (char)(v)
+#define JA_FMT_char "'%c' (0x%02hhx)"
+#define JA_FMT_ARGS_char(v) (char)(v), (unsigned char)(v)
 
 #define JA_TYPE_signed_char signed char
 #define JA_COMPARE_signed_char(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(signed char, a, OP, b)
 #define JA_EQUALS_signed_char(a, b) JA_CASTED_EQUALS_ARITHMETIC(signed char, a, b)
-#define JA_FMT_signed_char "%c"
-#define JA_FMT_ARGS_signed_char(v) (signed char)(v)
+#define JA_FMT_signed_char "'%c' (0x%02hhx)"
+#define JA_FMT_ARGS_signed_char(v) (char)(v), (unsigned char)(v)
 
 #define JA_TYPE_unsigned_char unsigned char
 #define JA_COMPARE_unsigned_char(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(unsigned char, a, OP, b)
 #define JA_EQUALS_unsigned_char(a, b) JA_CASTED_EQUALS_ARITHMETIC(unsigned char, a, b)
-#define JA_FMT_unsigned_char "%c"
-#define JA_FMT_ARGS_unsigned_char(v) (unsigned char)(v)
+#define JA_FMT_unsigned_char "'%c' (0x%02hhx)"
+#define JA_FMT_ARGS_unsigned_char(v) (char)(v), (unsigned char)(v)
 
 #define JA_TYPE_short short
 #define JA_COMPARE_short(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(short, a, OP, b)
@@ -230,13 +230,13 @@
 #define JA_TYPE_wchar_t wchar_t
 #define JA_COMPARE_wchar_t(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(wchar_t, a, OP, b)
 #define JA_EQUALS_wchar_t(a, b) JA_CASTED_EQUALS_ARITHMETIC(wchar_t, a, b)
-#define JA_FMT_wchar_t "%lc"
+#define JA_FMT_wchar_t "L'%lc'"
 #define JA_FMT_ARGS_wchar_t(v) (wint_t)(v)
 
 #define JA_TYPE_wint_t wint_t
 #define JA_COMPARE_wint_t(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(wint_t, a, OP, b)
 #define JA_EQUALS_wint_t(a, b) JA_CASTED_EQUALS_ARITHMETIC(wint_t, a, b)
-#define JA_FMT_wint_t "%lc"
+#define JA_FMT_wint_t "L'%lc'"
 #define JA_FMT_ARGS_wint_t(v) (wint_t)(v)
 
 // Fixed-Width Integer Types
