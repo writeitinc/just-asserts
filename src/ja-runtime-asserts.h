@@ -109,20 +109,20 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 #include <stdio.h>
 #include <stdlib.h>
 
-static void ja__report_trace(JACheckType check_type, JATrace trace);
-static void ja__report_line(const char *fmt, ...);
-static void ja__report(const char *fmt, ...);
-static void ja__report_line_va(const char *fmt, va_list va_args);
-static void ja__report_va(const char *fmt, va_list va_args);
-static void ja__report_char(char c);
+static void report_trace(JACheckType check_type, JATrace trace);
+static void report_line(const char *fmt, ...);
+static void report(const char *fmt, ...);
+static void report_line_va(const char *fmt, va_list va_args);
+static void report_va(const char *fmt, va_list va_args);
+static void report_char(char c);
 
 void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...)
 {
 	va_list va_args;
 	va_start(va_args, fmt);
 
-	ja__report_trace(check_type, trace);
-	ja__report_line_va(fmt, va_args);
+	report_trace(check_type, trace);
+	report_line_va(fmt, va_args);
 
 	va_end(va_args);
 
@@ -150,19 +150,19 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 		[JA__NON_EQUALITY] = "non-equality",
 	};
 
-	ja__report_trace(check_type, trace);
-	ja__report_line("%s for %s of type `%s`", FAILURE_DESCRIPTIONS[check_type],
+	report_trace(check_type, trace);
+	report_line("%s for %s of type `%s`", FAILURE_DESCRIPTIONS[check_type],
 			COMPARISON_TYPE_STR[cmp_type], type_str);
 
 	// "        Assertion: (<expr_a>) <op> (<expr_b>)"
 	// "               ==> (<res_a>) <op> (<res_b>)"
-	ja__report_line("Assertion: %s %s %s", expr_a_str, op_str, expr_b_str);
-	ja__report_char('\t');
-	ja__report("       ==> ");
-	ja__report_va(type_fmt, va_args);
-	ja__report(" %s ", op_str);
-	ja__report_va(type_fmt, va_args);
-	ja__report_char('\n');
+	report_line("Assertion: %s %s %s", expr_a_str, op_str, expr_b_str);
+	report_char('\t');
+	report("       ==> ");
+	report_va(type_fmt, va_args);
+	report(" %s ", op_str);
+	report_va(type_fmt, va_args);
+	report_char('\n');
 
 	va_end(va_args);
 
@@ -171,49 +171,49 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 	}
 }
 
-void ja__report_trace(JACheckType check_type, JATrace trace)
+void report_trace(JACheckType check_type, JATrace trace)
 {
 	const char *CHECK_TYPE_DIAGNOSTIC_STR[] = {
 		[JA__ASSERTION] = "assert",
 		[JA__EXPECTATION] = "expect",
 	};
-	ja__report("[ja:%s] <%s:%s:%u>\n", CHECK_TYPE_DIAGNOSTIC_STR[check_type],
+	report("[ja:%s] <%s:%s:%u>\n", CHECK_TYPE_DIAGNOSTIC_STR[check_type],
 			trace.file, trace.func, trace.line);
 }
 
-void ja__report_line(const char *fmt, ...)
+void report_line(const char *fmt, ...)
 {
 	va_list va_args;
 	va_start(va_args, fmt);
 
-	ja__report_line_va(fmt, va_args);
+	report_line_va(fmt, va_args);
 
 	va_end(va_args);
 }
 
-void ja__report_line_va(const char *fmt, va_list va_args)
+void report_line_va(const char *fmt, va_list va_args)
 {
-	ja__report_char('\t');
-	ja__report_va(fmt, va_args);
-	ja__report_char('\n');
+	report_char('\t');
+	report_va(fmt, va_args);
+	report_char('\n');
 }
 
-void ja__report(const char *fmt, ...)
+void report(const char *fmt, ...)
 {
 	va_list va_args;
 	va_start(va_args, fmt);
 
-	ja__report_va(fmt, va_args);
+	report_va(fmt, va_args);
 
 	va_end(va_args);
 }
 
-void ja__report_va(const char *fmt, va_list va_args)
+void report_va(const char *fmt, va_list va_args)
 {
 	vfprintf(stderr, fmt, va_args);
 }
 
-void ja__report_char(char c)
+void report_char(char c)
 {
 	putc(c, stderr);
 }
