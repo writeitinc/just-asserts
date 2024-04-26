@@ -184,9 +184,7 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 #include <stdlib.h>
 
 static void report_trace(JACheckType check_type, JATrace trace);
-static void report_line(const char *fmt, ...);
 static void report(const char *fmt, ...);
-static void report_line_va(const char *fmt, va_list va_args);
 static void report_va(const char *fmt, va_list va_args);
 static void report_char(char c);
 
@@ -201,7 +199,10 @@ void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...)
 	va_start(va_args, fmt);
 
 	report_trace(check_type, trace);
-	report_line_va(fmt, va_args);
+
+	report_char('\t');
+	report_va(fmt, va_args);
+	report_char('\n');
 
 	va_end(va_args);
 
@@ -232,12 +233,12 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 	};
 
 	report_trace(check_type, trace);
-	report_line("%s for %s of type `%s`", FAILURE_DESCRIPTIONS[check_type],
+	report("\t%s for %s of type `%s`\n", FAILURE_DESCRIPTIONS[check_type],
 			COMPARISON_TYPE_STR[cmp_type], type_str);
 
 	// "        Assertion: (<expr_a>) <op> (<expr_b>)"
 	// "               ==> (<res_a>) <op> (<res_b>)"
-	report_line("Assertion: %s %s %s", expr_a_str, op_str, expr_b_str);
+	report("\tAssertion: %s %s %s\n", expr_a_str, op_str, expr_b_str);
 	report_char('\t');
 	report("       ==> ");
 	report_va(type_fmt, va_args);
@@ -261,25 +262,6 @@ void report_trace(JACheckType check_type, JATrace trace)
 	};
 	report("[ja:%s] <%s:%s:%u>\n", CHECK_TYPE_DIAGNOSTIC_STR[check_type],
 			trace.file, trace.func, trace.line);
-}
-
-// Prints an indented formatted line to `stderr`.
-void report_line(const char *fmt, ...)
-{
-	va_list va_args;
-	va_start(va_args, fmt);
-
-	report_line_va(fmt, va_args);
-
-	va_end(va_args);
-}
-
-// Prints an indented formatted line to `stderr`.
-void report_line_va(const char *fmt, va_list va_args)
-{
-	report_char('\t');
-	report_va(fmt, va_args);
-	report_char('\n');
 }
 
 // Prints a formatted message to `stderr`.
