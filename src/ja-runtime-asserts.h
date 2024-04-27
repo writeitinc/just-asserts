@@ -13,9 +13,9 @@
 #include "ja-templates.h"
 
 #ifdef JA_DEBUG
-# define JA__DEBUG_ONLY(expr) (expr)
+# define JA_DEBUG_RELEASE_SWITCH(debug, release) debug
 #else
-# define JA__DEBUG_ONLY(expr) (void)0
+# define JA_DEBUG_RELEASE_SWITCH(debug, release) release
 #endif
 
 // Checks a condition (fatal).
@@ -57,10 +57,10 @@
 /*
  * NOTE: `expr` is not evaluated in a release build.
  */
-#define ja_dbg_assert(expr) JA__DEBUG_ONLY(ja_assert(expr))
-#define ja_dbg_assert_msg(expr, msg) JA__DEBUG_ONLY(ja_assert_msg(expr, msg))
-#define ja_dbg_expect(expr) JA__DEBUG_ONLY(ja_expect(expr))
-#define ja_dbg_expect_msg(expr, msg) JA__DEBUG_ONLY(ja_expect_msg(expr, msg))
+#define ja_dbg_assert(expr) JA_DEBUG_RELEASE_SWITCH(ja_assert(expr), (void)0)
+#define ja_dbg_assert_msg(expr, msg) JA_DEBUG_RELEASE_SWITCH(ja_assert_msg(expr, msg), (void)0)
+#define ja_dbg_expect(expr) JA_DEBUG_RELEASE_SWITCH(ja_expect(expr), (void)0)
+#define ja_dbg_expect_msg(expr, msg) JA_DEBUG_RELEASE_SWITCH(ja_expect_msg(expr, msg), (void)0)
 
 #ifdef JA_DEBUG
 // Checks a condition in a debug build but assumes it is true in a release build.
