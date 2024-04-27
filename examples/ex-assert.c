@@ -1,5 +1,8 @@
 #include <just-asserts/ja-runtime-asserts.h>
 
+#include <stdlib.h>
+#include <time.h>
+
 typedef struct Vec2D {
 	float x;
 	float y;
@@ -10,16 +13,13 @@ typedef struct Vec2D {
 #define JA_FMT_Vec2D "[%g, %g]"
 #define JA_FMT_ARGS_Vec2D(v) (v).x, (v).y
 
-#include <stdlib.h>
-#include <time.h>
-
 int main(void)
 {
 	ja_assert(1);
 	// ja_assert(0); // <-- runtime error (aborts)
 
 	ja_expect(1);
-	ja_expect(0);
+	ja_expect(0); // runtime warning
 
 	// one of these will (probably) cause a runtime warning
 	ja_expect_msg(sizeof(long) == sizeof(long long),
@@ -44,18 +44,20 @@ int main(void)
 	ja_expect_eq(ptr, &vec, &vec.y); // runtime warning
 
 	ja_expect_eq(cstr, "deadbeef", "deadbeef");
-	ja_expect_eq(cstr, "deadbeef", "feedbeef");
+	ja_expect_eq(cstr, "deadbeef", "feedbeef"); // runtime warning
 
-	ja_expect_neq(double_complex, 2.0+1.5*I, 2.0+1.5*I);
-	ja_expect_neq(float_complex, 2.0f+1.5f*I, 2.0f+1.5f*I);
-	ja_expect_neq(long_double_complex, 2.0l+1.5l*I, 2.0l+1.5l*I);
+	ja_expect_neq(double_complex, 2.0+1.5*I, 2.0+1.5*I); // runtime warning
+	ja_expect_neq(float_complex, 2.0f+1.5f*I, 2.0f+1.5f*I); // runtime warning
+	ja_expect_neq(long_double_complex, 2.0l+1.5l*I, 2.0l+1.5l*I); // runtime warning
 
 	struct tm local_tz_time = *localtime(&(time_t){ time(NULL) });
 	struct tm utc_time = *gmtime(&(time_t){ time(NULL) });
-	ja_expect_eq(struct_tm, local_tz_time, utc_time);
+	ja_expect_eq(struct_tm, local_tz_time, utc_time); // probable runtime warning
 
 	ja_expect_eq(div_t, div(8, 3), div(12, 5));
-	ja_expect_eq(div_t, div(8, 3), div(12, 7));
+	ja_expect_eq(div_t, div(8, 3), div(12, 7)); // runtime warning
+
+	// TODO add example(s) for ja_assume_true()/ja_assume_false()
 
 	return 0;
 }
