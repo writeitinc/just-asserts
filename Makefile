@@ -35,7 +35,7 @@ LIBRARIES = $(STATIC_LIB) $(SHARED_LIB)
 STATIC_LIB = $(LIB_DIR)/lib$(NAME).a
 SHARED_LIB = $(LIB_DIR)/lib$(NAME).so
 
-BINARIES = $(BIN_DIR)/ex-assert
+BINARIES = $(BIN_DIR)/ex-runtime-asserts
 
 .PHONY: default
 default: release
