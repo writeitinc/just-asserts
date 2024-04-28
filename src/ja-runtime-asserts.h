@@ -184,8 +184,9 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 #include <stdlib.h>
 
 static void report_trace(JACheckType check_type, JATrace trace);
-static void report(const char *fmt, ...);
-static void report_va(const char *fmt, va_list va_args);
+static void report(const char *str);
+static void reportf(const char *fmt, ...);
+static void reportf_va(const char *fmt, va_list va_args);
 static void report_char(char c);
 
 // Prints to `stderr` the details of a failed assertion or expectation.
@@ -201,7 +202,7 @@ void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...)
 	report_trace(check_type, trace);
 
 	report_char('\t');
-	report_va(fmt, va_args);
+	reportf_va(fmt, va_args);
 	report_char('\n');
 
 	va_end(va_args);
@@ -233,17 +234,17 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 	};
 
 	report_trace(check_type, trace);
-	report("\t%s for %s of type `%s`\n", FAILURE_DESCRIPTIONS[check_type],
+	reportf("\t%s for %s of type `%s`\n", FAILURE_DESCRIPTIONS[check_type],
 			COMPARISON_TYPE_STR[cmp_type], type_str);
 
 	// "        Assertion: (<expr_a>) <op> (<expr_b>)"
 	// "               ==> (<res_a>) <op> (<res_b>)"
-	report("\tAssertion: %s %s %s\n", expr_a_str, op_str, expr_b_str);
+	reportf("\tAssertion: %s %s %s\n", expr_a_str, op_str, expr_b_str);
 	report_char('\t');
 	report("       ==> ");
-	report_va(type_fmt, va_args);
-	report(" %s ", op_str);
-	report_va(type_fmt, va_args);
+	reportf_va(type_fmt, va_args);
+	reportf(" %s ", op_str);
+	reportf_va(type_fmt, va_args);
 	report_char('\n');
 
 	va_end(va_args);
@@ -260,23 +261,29 @@ void report_trace(JACheckType check_type, JATrace trace)
 		[JA__ASSERTION] = "assert",
 		[JA__EXPECTATION] = "expect",
 	};
-	report("[ja:%s] <%s:%s:%u>\n", CHECK_TYPE_DIAGNOSTIC_STR[check_type],
+	reportf("[ja:%s] <%s:%s:%u>\n", CHECK_TYPE_DIAGNOSTIC_STR[check_type],
 			trace.file, trace.func, trace.line);
 }
 
+// Prints a message to `stderr`.
+void report(const char *str)
+{
+	fputs(str, stderr);
+}
+
 // Prints a formatted message to `stderr`.
-void report(const char *fmt, ...)
+void reportf(const char *fmt, ...)
 {
 	va_list va_args;
 	va_start(va_args, fmt);
 
-	report_va(fmt, va_args);
+	reportf_va(fmt, va_args);
 
 	va_end(va_args);
 }
 
 // Prints a formatted message to `stderr`.
-void report_va(const char *fmt, va_list va_args)
+void reportf_va(const char *fmt, va_list va_args)
 {
 	vfprintf(stderr, fmt, va_args);
 }
