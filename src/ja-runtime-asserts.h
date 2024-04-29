@@ -148,6 +148,19 @@
 					JA_TYPE_STR(T), JA_FMT(T), #a, "!=", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
+// Checks that two memory regions compare equal (fatal).
+/*
+ * If the two regions do not compare equal, prints a diagnostic message and terminates the
+ * application with a status of `EXIT_FAILURE`.
+ */
+#define ja_assert_mem_eq(a, b, len) ja__mem_eq(JA__ASSERTION, JA__TRACE, a, b, len)
+
+// Checks that two memory regions compare equal (nonfatal).
+/*
+ * If the two regions do not compare equal, prints a diagnostic message.
+ */
+#define ja_expect_mem_eq(a, b, len) ja__mem_eq(JA__EXPECTATION, JA__TRACE, a, b, len)
+
 typedef enum JACheckType {
 	JA__ASSERTION,
 	JA__EXPECTATION,
@@ -171,6 +184,8 @@ typedef struct JATrace {
 		.line = __LINE__, \
 	}
 
+void ja__mem_eq(JACheckType check_type, JATrace trace,
+		const void *a, const void *b, size_t len);
 void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...);
 void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
 		const char *type_str, const char *type_fmt,
@@ -183,11 +198,38 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 #include <stdio.h>
 #include <stdlib.h>
 
+static void mem_eq_fail(JACheckType check_type, JATrace trace,
+		const void *a, const void *b, size_t len, size_t failed_idx);
+
 static void report_trace(JACheckType check_type, JATrace trace);
 static void report(const char *str);
 static void reportf(const char *fmt, ...);
 static void reportf_va(const char *fmt, va_list va_args);
 static void report_char(int c);
+
+static const char *FAILURE_DESCRIPTIONS[] = {
+	[JA__ASSERTION] = "Failed assertion",
+	[JA__EXPECTATION] = "Unmet expectation",
+};
+
+static const char *COMPARISON_TYPE_STR[] = {
+	[JA__GENERIC_COMPARISON] = "comparison",
+	[JA__EQUALITY] = "equality",
+	[JA__NON_EQUALITY] = "non-equality",
+};
+
+// Checks if two memory regions compare equal; if not, calls `mem_eq_fail()`.
+void ja__mem_eq(JACheckType check_type, JATrace trace,
+		const void *a, const void *b, size_t len)
+{
+	const unsigned char *a_bytes = a;
+	const unsigned char *b_bytes = b;
+	for (size_t i = 0; i < len; ++i) {
+		if (a_bytes[i] != b_bytes[i]) {
+			mem_eq_fail(check_type, trace, a, b, len, i);
+		}
+	}
+}
 
 // Prints to `stderr` the details of a failed assertion or expectation.
 // In the case of a failed assertion, the application is terminated with a status of `EXIT_FAILURE`.
@@ -222,17 +264,6 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 	va_list va_args;
 	va_start(va_args, expr_b_str);
 
-	const char *FAILURE_DESCRIPTIONS[] = {
-		[JA__ASSERTION] = "Failed assertion",
-		[JA__EXPECTATION] = "Unmet expectation",
-	};
-
-	const char *COMPARISON_TYPE_STR[] = {
-		[JA__GENERIC_COMPARISON] = "comparison",
-		[JA__EQUALITY] = "equality",
-		[JA__NON_EQUALITY] = "non-equality",
-	};
-
 	report_trace(check_type, trace);
 	reportf("\t%s for %s of type `%s`\n", FAILURE_DESCRIPTIONS[check_type],
 			COMPARISON_TYPE_STR[cmp_type], type_str);
@@ -248,6 +279,26 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 	report_char('\n');
 
 	va_end(va_args);
+
+	if (check_type == JA__ASSERTION) {
+		exit(EXIT_FAILURE);
+	}
+}
+
+// Prints to `stderr` the details of a failed equality assertion/expectation of two memory regions.
+// In the case of a failed assertion, the application is terminated with a status of `EXIT_FAILURE`.
+void mem_eq_fail(JACheckType check_type, JATrace trace,
+		const void *a, const void *b, size_t len, size_t failed_idx)
+{
+	report_trace(check_type, trace);
+
+	reportf("\t%s for memory equality check of length %zu\n",
+			FAILURE_DESCRIPTIONS[check_type], len);
+
+	reportf("\tMismatch at index %zu (0x%hhx != 0x%hhx)\n",
+			failed_idx,
+			((const char *)a)[failed_idx],
+			((const char *)b)[failed_idx]);
 
 	if (check_type == JA__ASSERTION) {
 		exit(EXIT_FAILURE);

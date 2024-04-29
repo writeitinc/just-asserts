@@ -57,6 +57,9 @@ int main(void)
 	ja_expect_eq(div_t, div(8, 3), div(12, 5));
 	ja_expect_eq(div_t, div(8, 3), div(12, 7)); // runtime warning
 
+	ja_expect_mem_eq("deadbeef", "deadbeef", 9);
+	ja_expect_mem_eq("feedfeef", "feedbeef", 9); // runtime warning
+
 	// TODO add example(s) for ja_assume_true()/ja_assume_false()
 
 	return 0;
