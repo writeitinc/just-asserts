@@ -187,7 +187,7 @@ static void report_trace(JACheckType check_type, JATrace trace);
 static void report(const char *str);
 static void reportf(const char *fmt, ...);
 static void reportf_va(const char *fmt, va_list va_args);
-static void report_char(char c);
+static void report_char(int c);
 
 // Prints to `stderr` the details of a failed assertion or expectation.
 // In the case of a failed assertion, the application is terminated with a status of `EXIT_FAILURE`.
@@ -289,7 +289,7 @@ void reportf_va(const char *fmt, va_list va_args)
 }
 
 // Prints a byte to `stderr`.
-void report_char(char c)
+void report_char(int c)
 {
 	putc(c, stderr);
 }
