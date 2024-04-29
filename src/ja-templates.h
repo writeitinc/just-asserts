@@ -47,20 +47,20 @@
 #define JA_TYPE_char char
 #define JA_COMPARE_char(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(char, a, OP, b)
 #define JA_EQUALS_char(a, b) JA_CASTED_EQUALS_ARITHMETIC(char, a, b)
-#define JA_FMT_char "'%c' (0x%02hhx)"
-#define JA_FMT_ARGS_char(v) (char)(v), (unsigned char)(v)
+#define JA_FMT_char "'%s' (0x%02hhx)"
+#define JA_FMT_ARGS_char(v) ja_char_to_possibly_escaped_char(v).str, (unsigned char)(v)
 
 #define JA_TYPE_signed_char signed char
 #define JA_COMPARE_signed_char(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(signed char, a, OP, b)
 #define JA_EQUALS_signed_char(a, b) JA_CASTED_EQUALS_ARITHMETIC(signed char, a, b)
-#define JA_FMT_signed_char "'%c' (0x%02hhx)"
-#define JA_FMT_ARGS_signed_char(v) (char)(v), (unsigned char)(v)
+#define JA_FMT_signed_char "'%s' (0x%02hhx)"
+#define JA_FMT_ARGS_signed_char(v) ja_char_to_possibly_escaped_char(v).str, (unsigned char)(v)
 
 #define JA_TYPE_unsigned_char unsigned char
 #define JA_COMPARE_unsigned_char(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(unsigned char, a, OP, b)
 #define JA_EQUALS_unsigned_char(a, b) JA_CASTED_EQUALS_ARITHMETIC(unsigned char, a, b)
-#define JA_FMT_unsigned_char "'%c' (0x%02hhx)"
-#define JA_FMT_ARGS_unsigned_char(v) (char)(v), (unsigned char)(v)
+#define JA_FMT_unsigned_char "'%s' (0x%02hhx)"
+#define JA_FMT_ARGS_unsigned_char(v) ja_char_to_possibly_escaped_char(v).str, (unsigned char)(v)
 
 #define JA_TYPE_short short
 #define JA_COMPARE_short(a, OP, b) JA_CASTED_COMPARE_ARITHMETIC(short, a, OP, b)
@@ -447,7 +447,13 @@ typedef struct JAAsciiTime {
 	char ascii[26];
 } JAAsciiTime;
 
+typedef struct JAPossiblyEscapedChar {
+	char str[3];
+} JAPossiblyEscapedChar;
+
 JAAsciiTime ja_cpy_asctime(const char asctime_str[26]);
+
+JAPossiblyEscapedChar ja_char_to_possibly_escaped_char(char c);
 
 #ifdef JA_IMPLEMENTATION
 #include <string.h>
@@ -459,6 +465,38 @@ JAAsciiTime ja_cpy_asctime(const char asctime_str[26])
 
 	return ascii_time;
 }
+
+JAPossiblyEscapedChar ja_char_to_possibly_escaped_char(char c)
+{
+	switch (c) {
+	case '\0':
+		return (JAPossiblyEscapedChar){ "\\0" };
+	case '\'':
+		return (JAPossiblyEscapedChar){ "\\'" };
+	case '\\':
+		return (JAPossiblyEscapedChar){ "\\\\" };
+	case '\a':
+		return (JAPossiblyEscapedChar){ "\\a" };
+	case '\b':
+		return (JAPossiblyEscapedChar){ "\\b" };
+	case '\f':
+		return (JAPossiblyEscapedChar){ "\\f" };
+	case '\n':
+		return (JAPossiblyEscapedChar){ "\\n" };
+	case '\r':
+		return (JAPossiblyEscapedChar){ "\\r" };
+	case '\t':
+		return (JAPossiblyEscapedChar){ "\\t" };
+	case '\v':
+		return (JAPossiblyEscapedChar){ "\\v" };
+
+	case '\?':
+	case '\"':
+	default:
+		return (JAPossiblyEscapedChar){ { c, '\0' } };
+	}
+}
+
 #endif // JA_IMPLEMENTATION
 
 #endif // ja_template_h

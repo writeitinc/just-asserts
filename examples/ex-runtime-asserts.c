@@ -36,6 +36,9 @@ int main(void)
 	ja_assert_neq(float, 1.0f, 1.5f);
 	ja_expect_neq(int, 1.0f, 1.5f); // runtime warning
 
+	ja_expect_eq(char, ' ', '\x20'); // true for ascii
+	ja_expect_eq(char, ' ', '\n'); // runtime warning
+
 	Vec2D vec = { 2, 1.5 };
 	ja_expect_eq(Vec2D, vec, ((Vec2D){ 2, 1.5 })); // compound literals require parentheses
 	ja_expect_eq(Vec2D, ((Vec2D){ 1, 2 }), ((Vec2D){ 2, 1 })); // runtime warning
