@@ -62,29 +62,34 @@
 #define ja_dbg_expect(expr) JA_DEBUG_RELEASE_SWITCH(ja_expect(expr), (void)0)
 #define ja_dbg_expect_msg(expr, msg) JA_DEBUG_RELEASE_SWITCH(ja_expect_msg(expr, msg), (void)0)
 
-#ifdef JA_DEBUG
-// Checks a condition in a debug build but assumes it is true in a release build.
+// Verifies that a condition is true; evaluates to the value of the expression.
 /*
- * Evaluates to `expr`.
- * If `JA_DEBUG` is defined and `expr` is falsy (false, null, or zero), prints a diagnostic message.
- * If `JA_DEBUG` is not defined, `expr` is assumed to be truthy.
+ * If `expr` is falsy (false, null, or zero), prints a diagnostic message.
  */
-# define ja_assume_true(expr) (ja_expect_msg(expr, \
+#define ja_verify_true(expr) (ja_expect_msg(expr, \
 		"False expression was assumed to be true: `" #expr "`"), (expr))
 
-// Checks a condition in a debug build but assumes it is false in a release build.
+// Verifies that a condition is false; evaluates to the value of the expression.
 /*
- * Evaluates to `expr`.
+ * If `expr` is falsy (false, null, or zero), prints a diagnostic message.
+ */
+#define ja_verify_false(expr) (ja_expect_msg(!(expr), \
+		"True expression was assumed to be false: `" #expr "`"), (expr))
+
+// Either verifies (in a debug build) or assumes (in a release build) that a condition is true.
+// Evaluates to the (maybe assumed) value of the condition.
+/*
+ * If `JA_DEBUG` is defined and `expr` is falsy (false, null, or zero), prints a diagnostic message.
+ */
+#define ja_assume_true(expr) JA_DEBUG_RELEASE_SWITCH(ja_verify_true(expr), (1))
+
+// Either verifies (in a debug build) or assumes (in a release build) that a condition is false.
+// Evaluates to the (maybe assumed) value of the condition.
+/*
  * If `JA_DEBUG` is defined and `expr` is truthy (true, non-null, or non-zero), prints a diagnostic
  * message.
- * If `JA_DEBUG` is not defined, `expr` is assumed to be falsy.
  */
-# define ja_assume_false(expr) (ja_expect_msg(!(expr), \
-		"True expression was assumed to be false: `" #expr "`"), (expr))
-#else
-# define ja_assume_true(expr) (1)
-# define ja_assume_false(expr) (0)
-#endif
+#define ja_assume_false(expr) JA_DEBUG_RELEASE_SWITCH(ja_verify_false(expr), (0))
 
 // Checks a comparison (fatal).
 /*

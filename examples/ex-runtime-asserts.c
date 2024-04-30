@@ -63,7 +63,7 @@ int main(void)
 	ja_expect_mem_eq("deadbeef", "deadbeef", 9);
 	ja_expect_mem_eq("feedfeef", "feedbeef", 9); // runtime warning
 
-	// TODO add example(s) for ja_assume_true()/ja_assume_false()
+	// TODO add example(s) for ja_verify_true/false(), ja_assume_true/false(),
 
 	return 0;
 }
