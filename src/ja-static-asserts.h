@@ -1,6 +1,8 @@
 #ifndef just_asserts_static_asserts_h
 #define just_asserts_static_asserts_h
 
+#include "ja-version.h"
+
 /*
  * This header defines two macros:
  * - `ja_static_assert_msg(cond, message)`
