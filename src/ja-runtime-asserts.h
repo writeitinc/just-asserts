@@ -40,7 +40,7 @@
  */
 #define ja_assert_msg(expr, /* const char *fmt, */ ...) ((expr) \
 		? (void)0 \
-		: ja__fail(JA__ASSERTION, JA__TRACE, __VA_ARGS__))
+		: ja__fail(JA__ASSERTION, JA__LINE_TRACE, __VA_ARGS__))
 
 // Checks a condition (nonfatal, custom message).
 /*
@@ -50,7 +50,7 @@
  */
 #define ja_expect_msg(expr, /* const char *fmt, */ ...) ((expr) \
 		? (void)0 \
-		: ja__fail(JA__EXPECTATION, JA__TRACE, __VA_ARGS__))
+		: ja__fail(JA__EXPECTATION, JA__LINE_TRACE, __VA_ARGS__))
 
 // These debug macros are the same as their non-debug counterparts except that they evaluate to a
 // no-op in a release build.
@@ -98,7 +98,7 @@
  */
 #define ja_assert_cmp(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
 		? (void)0 \
-		: ja__cmp_fail(JA__ASSERTION, JA__TRACE, JA__GENERIC_COMPARISON, \
+		: ja__cmp_fail(JA__ASSERTION, JA__LINE_TRACE, JA__GENERIC_COMPARISON, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 // Checks a comparison (nonfatal).
@@ -107,7 +107,7 @@
  */
 #define ja_expect_cmp(T, a, OP, b) (JA_COMPARE(T, a, OP, b) \
 		? (void)0 \
-		: ja__cmp_fail(JA__EXPECTATION, JA__TRACE, JA__GENERIC_COMPARISON, \
+		: ja__cmp_fail(JA__EXPECTATION, JA__LINE_TRACE, JA__GENERIC_COMPARISON, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, #OP, #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
@@ -118,7 +118,7 @@
  */
 #define ja_assert_eq(T, a, b) (JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__cmp_fail(JA__ASSERTION, JA__TRACE, JA__EQUALITY, \
+		: ja__cmp_fail(JA__ASSERTION, JA__LINE_TRACE, JA__EQUALITY, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, "==", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
@@ -128,7 +128,7 @@
  */
 #define ja_expect_eq(T, a, b) (JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__cmp_fail(JA__EXPECTATION, JA__TRACE, JA__EQUALITY, \
+		: ja__cmp_fail(JA__EXPECTATION, JA__LINE_TRACE, JA__EQUALITY, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, "==", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
@@ -139,7 +139,7 @@
  */
 #define ja_assert_neq(T, a, b) (!JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__cmp_fail(JA__ASSERTION, JA__TRACE, JA__NON_EQUALITY, \
+		: ja__cmp_fail(JA__ASSERTION, JA__LINE_TRACE, JA__NON_EQUALITY, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, "!=", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
@@ -149,7 +149,7 @@
  */
 #define ja_expect_neq(T, a, b) (!JA_EQUALS(T, a, b) \
 		? (void)0 \
-		: ja__cmp_fail(JA__EXPECTATION, JA__TRACE, JA__NON_EQUALITY, \
+		: ja__cmp_fail(JA__EXPECTATION, JA__LINE_TRACE, JA__NON_EQUALITY, \
 					JA_TYPE_STR(T), JA_FMT(T), #a, "!=", #b, \
 					JA_FMT_ARGS(T, a), JA_FMT_ARGS(T, b)))
 
@@ -158,13 +158,13 @@
  * If the two regions do not compare equal, prints a diagnostic message and terminates the
  * application with a status of `EXIT_FAILURE`.
  */
-#define ja_assert_mem_eq(a, b, len) ja__mem_eq(JA__ASSERTION, JA__TRACE, a, b, len)
+#define ja_assert_mem_eq(a, b, len) ja__mem_eq(JA__ASSERTION, JA__LINE_TRACE, a, b, len)
 
 // Checks that two memory regions compare equal (nonfatal).
 /*
  * If the two regions do not compare equal, prints a diagnostic message.
  */
-#define ja_expect_mem_eq(a, b, len) ja__mem_eq(JA__EXPECTATION, JA__TRACE, a, b, len)
+#define ja_expect_mem_eq(a, b, len) ja__mem_eq(JA__EXPECTATION, JA__LINE_TRACE, a, b, len)
 
 typedef enum JACheckType {
 	JA__ASSERTION,
@@ -177,22 +177,22 @@ typedef enum JAComparisonType {
 	JA__NON_EQUALITY,
 } JAComparisonType;
 
-typedef struct JATrace {
+typedef struct JALineTrace {
 	const char *file;
 	const char *func;
 	unsigned int line;
-} JATrace;
+} JALineTrace;
 
-#define JA__TRACE (JATrace){ \
+#define JA__LINE_TRACE (JALineTrace){ \
 		.file = __FILE__, \
 		.func = __func__, \
 		.line = __LINE__, \
 	}
 
-void ja__mem_eq(JACheckType check_type, JATrace trace,
+void ja__mem_eq(JACheckType check_type, JALineTrace trace,
 		const void *a, const void *b, size_t len);
-void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...);
-void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
+void ja__fail(JACheckType check_type, JALineTrace trace, const char *fmt, ...);
+void ja__cmp_fail(JACheckType check_type, JALineTrace trace, JAComparisonType cmp_type,
 		const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);
@@ -203,10 +203,10 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 #include <stdio.h>
 #include <stdlib.h>
 
-static void mem_eq_fail(JACheckType check_type, JATrace trace,
+static void mem_eq_fail(JACheckType check_type, JALineTrace trace,
 		const void *a, const void *b, size_t len, size_t failed_idx);
 
-static void report_trace(JACheckType check_type, JATrace trace);
+static void report_line_trace(JACheckType check_type, JALineTrace trace);
 static void report(const char *str);
 static void reportf(const char *fmt, ...);
 static void reportf_va(const char *fmt, va_list va_args);
@@ -224,7 +224,7 @@ static const char *COMPARISON_TYPE_STR[] = {
 };
 
 // Checks if two memory regions compare equal; if not, calls `mem_eq_fail()`.
-void ja__mem_eq(JACheckType check_type, JATrace trace,
+void ja__mem_eq(JACheckType check_type, JALineTrace trace,
 		const void *a, const void *b, size_t len)
 {
 	const unsigned char *a_bytes = a;
@@ -241,12 +241,12 @@ void ja__mem_eq(JACheckType check_type, JATrace trace,
 /*
  * This function isn't designed to cope with multi-line formatted messages.
  */
-void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...)
+void ja__fail(JACheckType check_type, JALineTrace trace, const char *fmt, ...)
 {
 	va_list va_args;
 	va_start(va_args, fmt);
 
-	report_trace(check_type, trace);
+	report_line_trace(check_type, trace);
 
 	report_char('\t');
 	reportf_va(fmt, va_args);
@@ -261,7 +261,7 @@ void ja__fail(JACheckType check_type, JATrace trace, const char *fmt, ...)
 
 // Prints to `stderr` the details of a failed comparison assertion or comparison expectation.
 // In the case of a failed assertion, the application is terminated with a status of `EXIT_FAILURE`.
-void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_type,
+void ja__cmp_fail(JACheckType check_type, JALineTrace trace, JAComparisonType cmp_type,
 		const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */)
@@ -269,7 +269,7 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 	va_list va_args;
 	va_start(va_args, expr_b_str);
 
-	report_trace(check_type, trace);
+	report_line_trace(check_type, trace);
 	reportf("\t%s for %s of type `%s`\n", FAILURE_DESCRIPTIONS[check_type],
 			COMPARISON_TYPE_STR[cmp_type], type_str);
 
@@ -292,10 +292,10 @@ void ja__cmp_fail(JACheckType check_type, JATrace trace, JAComparisonType cmp_ty
 
 // Prints to `stderr` the details of a failed equality assertion/expectation of two memory regions.
 // In the case of a failed assertion, the application is terminated with a status of `EXIT_FAILURE`.
-void mem_eq_fail(JACheckType check_type, JATrace trace,
+void mem_eq_fail(JACheckType check_type, JALineTrace trace,
 		const void *a, const void *b, size_t len, size_t failed_idx)
 {
-	report_trace(check_type, trace);
+	report_line_trace(check_type, trace);
 
 	reportf("\t%s for memory equality check of length %zu\n",
 			FAILURE_DESCRIPTIONS[check_type], len);
@@ -311,7 +311,7 @@ void mem_eq_fail(JACheckType check_type, JATrace trace,
 }
 
 // Prints a line trace to `stderr` for an assertion or expectation.
-void report_trace(JACheckType check_type, JATrace trace)
+void report_line_trace(JACheckType check_type, JALineTrace trace)
 {
 	const char *CHECK_TYPE_DIAGNOSTIC_STR[] = {
 		[JA__ASSERTION] = "assert",
