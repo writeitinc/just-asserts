@@ -1,20 +1,18 @@
-# This Makefile is based on a template (lib+tests+examples.makefile version 1.0.0).
+# This Makefile is based on a template (lib+examples.makefile version 1.0.1).
 # See: https://github.com/writeitinc/makefile-templates
 
 NAME = just-asserts
 SOURCE_DIR = $(WORKING_DIR)/src
-TEST_DIR = $(WORKING_DIR)/tests
 EXAMPLE_DIR = $(WORKING_DIR)/examples
 
 ifndef NAME
 $(error NAME is not set)
 endif
 
-CFLAGS = $(WFLAGS) $(OPTIM) $(IFLAGS)
+CFLAGS = $(WFLAGS) $(OPTIM)
 
 CSTD = c99
 WFLAGS = -Wall -Wextra -pedantic -std=$(CSTD)
-IFLAGS = -I$(INCLUDE_DIR)
 
 WORKING_DIR = .
 BUILD_DIR = build
@@ -25,7 +23,6 @@ HEADER_DIR = $(INCLUDE_DIR)/$(NAME)
 OBJ_DIR = $(BUILD_DIR)/obj
 STATIC_OBJ_DIR = $(OBJ_DIR)/static
 SHARED_OBJ_DIR = $(OBJ_DIR)/shared
-TEST_OBJ_DIR = $(OBJ_DIR)/tests
 EXAMPLE_OBJ_DIR = $(OBJ_DIR)/examples
 
 LIB_DIR = $(BUILD_DIR)/lib
@@ -35,6 +32,7 @@ LIBRARIES = $(STATIC_LIB) $(SHARED_LIB)
 STATIC_LIB = $(LIB_DIR)/lib$(NAME).a
 SHARED_LIB = $(LIB_DIR)/lib$(NAME).so
 
+IFLAGS = -I$(INCLUDE_DIR)
 BINARIES = $(BIN_DIR)/ex-runtime-asserts \
 	   $(BIN_DIR)/ex-static-asserts
 
@@ -83,18 +81,6 @@ $(HEADER_DIR): $(HEADERS)
 	cp -u -t $@/ $^
 	touch $@
 
-# tests
-
-TEST_HEADERS = $(wildcard $(TEST_DIR)/*.h)
-
-TEST_LDFLAGS = -L$(LIB_DIR) -l:lib$(NAME).a $(LDFLAGS)
-
-$(BIN_DIR)/%: $(TEST_OBJ_DIR)/%.o $(LIBRARIES)
-	$(CC) -o $@ $< $(TEST_LDFLAGS) $(DEBUG) $(DEFINES)
-
-$(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.c $(HEADERS) $(TEST_HEADERS)
-	$(CC) -o $@ $< -c $(CFLAGS) $(DEBUG) $(DEFINES)
-
 # examples
 
 EXAMPLE_HEADERS = $(wildcard $(EXAMPLE_DIR)/*.h)
@@ -105,12 +91,12 @@ $(BIN_DIR)/%: $(EXAMPLE_OBJ_DIR)/%.o $(LIBRARIES)
 	$(CC) -o $@ $< $(EXAMPLE_LDFLAGS) $(DEBUG) $(DEFINES)
 
 $(EXAMPLE_OBJ_DIR)/%.o: $(EXAMPLE_DIR)/%.c $(HEADERS) $(EXAMPLE_HEADERS)
-	$(CC) -o $@ $< -c $(CFLAGS) $(DEBUG) $(DEFINES)
+	$(CC) -o $@ $< -c $(CFLAGS) $(IFLAGS) $(DEBUG) $(DEFINES)
 
 # dirs
 
 .PHONY: dirs
-dirs: $(INCLUDE_DIR)/ $(STATIC_OBJ_DIR)/ $(SHARED_OBJ_DIR)/ $(TEST_OBJ_DIR)/ $(EXAMPLE_OBJ_DIR)/ $(LIB_DIR)/ $(BIN_DIR)/
+dirs: $(INCLUDE_DIR)/ $(STATIC_OBJ_DIR)/ $(SHARED_OBJ_DIR)/ $(EXAMPLE_OBJ_DIR)/ $(LIB_DIR)/ $(BIN_DIR)/
 
 %/:
 	mkdir -p $@
