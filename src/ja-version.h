@@ -1,7 +1,7 @@
 #ifndef ja_version_h
 #define ja_version_h
 
-#define JA_HEADER_VERSION_MAJOR 0
+#define JA_HEADER_VERSION_MAJOR 1
 #define JA_HEADER_VERSION_MINOR 0
 #define JA_HEADER_VERSION_PATCH 0
 #define JA_HEADER_VERSION_STRING JA__VERSION_TO_STRING( \
