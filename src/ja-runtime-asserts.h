@@ -10,6 +10,8 @@
 #ifndef ja_runtime_asserts_h
 #define ja_runtime_asserts_h
 
+#include <stddef.h>
+
 #include "ja-templates.h"
 #include "ja-version.h"
 
