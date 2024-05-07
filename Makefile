@@ -51,9 +51,10 @@ debug: dirs headers $(LIBRARIES) $(BINARIES)
 
 # library
 
+SOURCES = $(wildcard $(SOURCE_DIR)/*.c)
 HEADERS = $(wildcard $(SOURCE_DIR)/*.h)
-STATIC_OBJS = $(STATIC_OBJ_DIR)/$(NAME).o
-SHARED_OBJS = $(SHARED_OBJ_DIR)/$(NAME).o
+STATIC_OBJS = $(patsubst $(SOURCE_DIR)/%.c, $(STATIC_OBJ_DIR)/%.o, $(SOURCES))
+SHARED_OBJS = $(patsubst $(SOURCE_DIR)/%.c, $(SHARED_OBJ_DIR)/%.o, $(SOURCES))
 
 PIC_FLAGS = -fPIC
 
@@ -63,13 +64,13 @@ $(STATIC_LIB): $(STATIC_OBJS)
 $(SHARED_LIB): $(SHARED_OBJS)
 	$(CC) -o $@ $^ -shared $(PIC_FLAGS) $(LDFLAGS)
 
-$(STATIC_OBJ_DIR)/$(NAME).o: $(SOURCE_DIR)/$(NAME).h
-	$(CC) -o $@ -xc $< -c $(CFLAGS) $(DEBUG) $(DEFINES) \
-		-DJA_IMPLEMENTATION -DJA_DONT_INCLUDE_STD_HEADERS
+$(STATIC_OBJ_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS)
+	$(CC) -o $@ $< -c $(CFLAGS) $(DEBUG) $(DEFINES) \
+		-DJA_DONT_INCLUDE_STD_HEADERS
 
-$(SHARED_OBJ_DIR)/$(NAME).o: $(SOURCE_DIR)/$(NAME).h
-	$(CC) -o $@ -xc $< -c $(PIC_FLAGS) $(CFLAGS) $(DEBUG) $(DEFINES) \
-		-DJA_IMPLEMENTATION -DJA_DONT_INCLUDE_STD_HEADERS
+$(SHARED_OBJ_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS)
+	$(CC) -o $@ $< -c $(PIC_FLAGS) $(CFLAGS) $(DEBUG) $(DEFINES) \
+		-DJA_DONT_INCLUDE_STD_HEADERS
 
 # headers
 
