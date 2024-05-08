@@ -8,7 +8,7 @@
 #ifndef ja_template_h
 #define ja_template_h
 
-#include "ja-version.h"
+#include "ja-version.h" // IWYU pragma: export
 
 #define JA_TYPE(T) JA_TYPE_##T
 #define JA_TYPE_STR(T) JA__STR(JA_TYPE(T))

@@ -13,7 +13,7 @@
 #include <stddef.h>
 
 #include "ja-templates.h"
-#include "ja-version.h"
+#include "ja-version.h" // IWYU pragma: export
 
 #ifdef JA_DEBUG
 # define JA_DEBUG_RELEASE_SWITCH(debug, release) debug
