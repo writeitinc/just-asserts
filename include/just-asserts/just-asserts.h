@@ -13,9 +13,9 @@
 #ifndef just_asserts_h
 #define just_asserts_h
 
-#include "ja-runtime-asserts.h"
-#include "ja-static-asserts.h"
-#include "ja-version.h"
+#include "ja-runtime-asserts.h" // IWYU pragma: export
+#include "ja-static-asserts.h" // IWYU pragma: export
+#include "ja-version.h" // IWYU pragma: export
 
 #endif // just_asserts_h
 
