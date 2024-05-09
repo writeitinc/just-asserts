@@ -5,6 +5,8 @@
  * - JA_IMPLEMENTATION:
  *       The library will place objects and functions with external linkage should be placed in the
  *       current translation unit. This allows `just-asserts` to be used as a header-only library.
+ * - JA_STATIC_LIB:
+ *       Allows linking as a static library (only needed on windows).
  */
 
 #ifndef ja_runtime_asserts_h
@@ -12,6 +14,7 @@
 
 #include <stddef.h>
 
+#include "ja-export.h"
 #include "ja-templates.h"
 #include "ja-version.h" // IWYU pragma: export
 
@@ -192,10 +195,10 @@ typedef struct JALineTrace {
 		.line = __LINE__, \
 	}
 
-void ja__mem_eq(JACheckType check_type, JALineTrace trace,
+JA_EXPORT void ja__mem_eq(JACheckType check_type, JALineTrace trace,
 		const void *a, const void *b, size_t len);
-void ja__fail(JACheckType check_type, JALineTrace trace, const char *fmt, ...);
-void ja__cmp_fail(JACheckType check_type, JALineTrace trace, JAComparisonType cmp_type,
+JA_EXPORT void ja__fail(JACheckType check_type, JALineTrace trace, const char *fmt, ...);
+JA_EXPORT void ja__cmp_fail(JACheckType check_type, JALineTrace trace, JAComparisonType cmp_type,
 		const char *type_str, const char *type_fmt,
 		const char *expr_a_str, const char *op_str, const char *expr_b_str,
 		... /* T res_a, T res_b */);

@@ -8,6 +8,8 @@
  * - JA_DONT_INCLUDE_STD_HEADERS:
  *       Indicates that the library should not include standard headers. This means if you use a
  *       macro whose contents depends on the inclusion of a header, you must include it yourself.
+ * - JA_STATIC_LIB:
+ *       Allows linking as a static library (only needed on windows).
  */
 
 #ifndef just_asserts_h
