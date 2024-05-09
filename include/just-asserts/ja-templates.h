@@ -3,11 +3,14 @@
  * - JA_DONT_INCLUDE_STD_HEADERS:
  *       Indicates that the library should not include standard headers. This means if you use a
  *       macro whose contents depends on the inclusion of a header, you must include it yourself.
+ * - JA_STATIC_LIB:
+ *       Allows linking as a static library (only needed on windows).
  */
 
 #ifndef ja_template_h
 #define ja_template_h
 
+#include "ja-export.h"
 #include "ja-version.h" // IWYU pragma: export
 
 #define JA_TYPE(T) JA_TYPE_##T
@@ -453,9 +456,9 @@ typedef struct JAPossiblyEscapedChar {
 	char str[3];
 } JAPossiblyEscapedChar;
 
-JAAsciiTime ja_cpy_asctime(const char asctime_str[26]);
+JA_EXPORT JAAsciiTime ja_cpy_asctime(const char asctime_str[26]);
 
-JAPossiblyEscapedChar ja_char_to_possibly_escaped_char(char c);
+JA_EXPORT JAPossiblyEscapedChar ja_char_to_possibly_escaped_char(char c);
 
 #ifdef JA_IMPLEMENTATION
 #include <string.h>

@@ -1,6 +1,8 @@
 #ifndef ja_version_h
 #define ja_version_h
 
+#include "ja-export.h"
+
 #define JA_HEADER_VERSION_MAJOR 1
 #define JA_HEADER_VERSION_MINOR 0
 #define JA_HEADER_VERSION_PATCH 1
@@ -9,10 +11,10 @@
 		JA_HEADER_VERSION_MINOR, \
 		JA_HEADER_VERSION_PATCH)
 
-extern const int JA_LIB_VERSION_MAJOR;
-extern const int JA_LIB_VERSION_MINOR;
-extern const int JA_LIB_VERSION_PATCH;
-extern const char JA_LIB_VERSION_STRING[];
+JA_EXPORT extern const int JA_LIB_VERSION_MAJOR;
+JA_EXPORT extern const int JA_LIB_VERSION_MINOR;
+JA_EXPORT extern const int JA_LIB_VERSION_PATCH;
+JA_EXPORT extern const char JA_LIB_VERSION_STRING[];
 
 #define JA__VERSION_TO_STRING(major, minor, patch) JA__VERSION_TO_STRING_(major, minor, patch)
 #define JA__VERSION_TO_STRING_(major, minor, patch) #major "." #minor "." #patch
