@@ -7,7 +7,7 @@ ja_static_assert_msg(2 + 2 != 5, "Literally 1987.");
 
 struct S {
 	int i;
-#ifdef JA_STATIC_ASSERT_IN_STRUCT_DECL
+#if defined(JA_STATIC_ASSERT_IN_STRUCT_DECL)
 	ja_static_assert_msg(1, "Honestly, I'm not really sure if this feature has any real use.");
 #endif
 };

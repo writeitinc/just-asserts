@@ -65,7 +65,7 @@
 # define ja_static_assert(cond) \
 	ja_static_assert_msg(cond, "Expression `" #cond "` should be non-zero")
 
-#elif __clang__
+#elif defined(__clang__)
 
 // prevent glibc from shadowing the _Static_assert builtin
 # undef _Static_assert
@@ -85,7 +85,7 @@
 	_Pragma("GCC diagnostic pop")
 # define ja_static_assert(cond) ja_static_assert_msg(cond, "`" #cond "`")
 
-#elif __GNUC__
+#elif defined(__GNUC__)
 
 // prevent glibc from shadowing the _Static_assert builtin
 # undef _Static_assert
