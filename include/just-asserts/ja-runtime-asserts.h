@@ -14,9 +14,9 @@
 
 #include <stddef.h>
 
-#include "ja-export.h"
-#include "ja-templates.h"
-#include "ja-version.h" // IWYU pragma: export
+#include "internal/ja-export.h"
+#include "internal/ja-templates.h"
+#include "internal/ja-version.h" // IWYU pragma: export
 
 #ifdef JA_DEBUG
 # define JA_DEBUG_RELEASE_SWITCH(debug, release) debug

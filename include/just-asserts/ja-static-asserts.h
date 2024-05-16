@@ -1,7 +1,7 @@
 #ifndef just_asserts_static_asserts_h
 #define just_asserts_static_asserts_h
 
-#include "ja-version.h" // IWYU pragma: export
+#include "internal/ja-version.h" // IWYU pragma: export
 
 /*
  * This header defines two macros:
