@@ -140,7 +140,7 @@
 #define JA_FMT_ptr "%p"
 #define JA_FMT_ARGS_ptr(v) (void *)(v)
 
-#ifndef JA_DONT_INCLUDE_STD_HEADERS
+#if !defined(JA_DONT_INCLUDE_STD_HEADERS)
 # include <string.h>
 #endif
 #define JA_TYPE_cstr const char *
@@ -179,8 +179,8 @@
 
 // Complex Types
 
-#ifndef __STDC_NO_COMPLEX__
-# ifndef JA_DONT_INCLUDE_STD_HEADERS
+#if !defined(__STDC_NO_COMPLEX__)
+# if !defined(JA_DONT_INCLUDE_STD_HEADERS)
 #  include <complex.h>
 # endif
 
