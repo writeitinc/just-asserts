@@ -58,7 +58,7 @@ INCLUDE_DIR = include
 HEADER_DIR = $(INCLUDE_DIR)/$(NAME)
 
 SOURCES = $(wildcard $(SOURCE_DIR)/*.c)
-HEADERS = $(wildcard $(HEADER_DIR)/*.h)
+HEADERS = $(wildcard $(HEADER_DIR)/*.h $(HEADER_DIR)/internal/*.h)
 
 # Outputs #
 
