@@ -10,6 +10,8 @@
  *       macro whose contents depends on the inclusion of a header, you must include it yourself.
  * - JA_STATIC_LIB:
  *       Allows linking as a static library (only needed on windows).
+ * - __STDC_NO_COMPLEX__:
+ *       Some compilers don't define this despite not suporting complex types.
  */
 
 #ifndef just_asserts_h
