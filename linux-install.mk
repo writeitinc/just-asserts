@@ -15,3 +15,4 @@ linux-install:
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/lib/"                    "$(LIB_DIR)/lib$(NAME).a"
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/licenses/$(NAME)/" "LICENSE"
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/doc/$(NAME)/"      "README.md"
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/lib/pkgconfig/"          "$(NAME).pc"
