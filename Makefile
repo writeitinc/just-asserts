@@ -1,7 +1,14 @@
-# This Makefile is based on a template (lib+examples.makefile version 4.0.0).
+# This Makefile is based on a template.
 # See: https://github.com/writeitinc/makefile-templates
 
+#### Project Config ############################################################
+
 NAME = just-asserts
+
+VERSION = $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
+VERSION_MAJOR = 1
+VERSION_MINOR = 0
+VERSION_PATCH = 1
 
 ifndef NAME
 $(error NAME is not set)
@@ -11,22 +18,24 @@ endif
 
 BUILD_TYPE = $(DEFAULT_BUILD_TYPE)
 CFLAGS = $(CFLAGS_DEFAULT)
-LDFLAGS = $(LTOFLAGS)
+LDFLAGS = # none by default
 LTOFLAGS = -flto=auto
 DEFINES = # none by default
 
 USE_WINDOWS_CMD = # guess by default
 PRODUCE_WINDOWS_OUTPUTS = # guess by default
 
-#### General Build Config ######################################################
+#### Build Config ##############################################################
 
 DEFAULT_BUILD_TYPE = release # release, debug, or sanitize
 CSTD = c99
 
 # Flags #
 
-CFLAGS_DEFAULT = $(OPTIM) $(WFLAGS)
-WFLAGS = -Wall -Wextra -Wpedantic -std=$(CSTD)
+CFLAGS_DEFAULT = $(OPTIM) $(WFLAGS) $(FEATURE_FLAGS)
+WFLAGS = -Wall -Wextra -Wpedantic
+FEATURE_FLAGS = -std=$(CSTD) $(FEATURE_TEST_MACRO_FLAGS)
+FEATURE_TEST_MACRO_FLAGS = # none by default
 
 OPTIM = $(OPTIM_$(BUILD_TYPE))
 OPTIM_release = -O2
@@ -34,8 +43,8 @@ OPTIM_debug = -g
 OPTIM_sanitize = $(OPTIM_debug)
 
 SANITIZE_FLAGS = $(SANITIZE_FLAGS_$(BUILD_TYPE))
-SANITIZE_FLAGS_release =
-SANITIZE_FLAGS_debug =
+SANITIZE_FLAGS_release = # none by default
+SANITIZE_FLAGS_debug = # none by default
 SANITIZE_FLAGS_sanitize = -fsanitize=address,undefined
 
 STATIC_LIB_FLAGS = -DJA_STATIC_LIB
@@ -72,66 +81,11 @@ STATIC_OBJS = $(patsubst $(SOURCE_DIR)/%.c, $(INTERMEDIATE_DIR)/%.static.o, $(SO
 SHARED_OBJS = $(patsubst $(SOURCE_DIR)/%.c, $(INTERMEDIATE_DIR)/%.shared.o, $(SOURCES))
 .SECONDARY: $(STATIC_OBJS) $(SHARED_OBJS)
 
-#### Examples Build Config #####################################################
-
-# Flags #
-
-EXAMPLE_CFLAGS = $(CFLAGS)
-EXAMPLE_LDFLAGS = -L$(LIB_DIR) -l$(NAME) \
-		  -Wl,-rpath,$(LIB_DIR) \
-		  $(LDFLAGS)
-
-# Inputs #
-
-EXAMPLE_SOURCE_DIR = examples
-EXAMPLE_HEADER_DIR = examples
-
-EXAMPLE_SOURCES = $(wildcard $(EXAMPLE_SOURCE_DIR)/*.c)
-EXAMPLE_HEADERS = $(wildcard $(EXAMPLE_HEADERS_DIR)/*.h)
-
-# Outputs #
-
-EXAMPLE_BIN_DIR = $(BIN_DIR)/examples
-EXAMPLES = $(patsubst $(EXAMPLE_SOURCE_DIR)/%.c, $(EXAMPLE_BIN_DIR)/%$(EXEC_EXT), $(EXAMPLE_SOURCES))
-
-# Intermediates #
-
-EXAMPLE_OBJS = $(patsubst $(EXAMPLE_SOURCE_DIR)/%.c, $(INTERMEDIATE_DIR)/%.example.o, $(EXAMPLE_SOURCES))
-.SECONDARY: $(EXAMPLE_OBJS)
-
 #### Platform/Toolchain Detection ##############################################
 
-ifeq ($(OS),Windows_NT)
-USE_WINDOWS_CMD = true
-PRODUCE_WINDOWS_OUTPUTS = true
-else # assume linux host & target
-USE_WINDOWS_CMD = false
-PRODUCE_WINDOWS_OUTPUTS = false
-endif
+include platform.mk
 
-ifeq ($(USE_WINDOWS_CMD),true)
-MKDIR_P = if not exist $(subst /,\,$(1)) mkdir $(subst /,\,$(1))
-RM_RF = del /S /Q $(subst /,\,$(1))
-else # use posix shell
-MKDIR_P = mkdir -p $(1)
-RM_RF = rm -rf $(1)
-endif
-
-ifeq ($(PRODUCE_WINDOWS_OUTPUTS),true)
-LIB_PREFIX =
-SHARED_LIB_EXT = .dll
-EXEC_EXT = .exe # NOTE: mingw will produce a file named *.exe regardless
-
-PLATFORM_SHARED_LIB_FLAGS = -Wl,--out-implib,$(@:dll=lib)
-else # produce linux outputs
-LIB_PREFIX = lib
-SHARED_LIB_EXT = .so
-EXEC_EXT =
-
-PLATFORM_SHARED_LIB_FLAGS = -fPIC -fvisibility=hidden
-endif
-
-#### Make Targets ##############################################################
+#### Build Targets #############################################################
 
 ### General ###
 
@@ -142,19 +96,16 @@ default: $(DEFAULT_BUILD_TYPE)
 release: BUILD_TYPE = release
 release: output-dirs
 release: $(LIBRARIES)
-release: $(EXAMPLES)
 
 .PHONY: debug
 debug: BUILD_TYPE = debug
 debug: output-dirs
 debug: $(LIBRARIES)
-debug: $(EXAMPLES)
 
 .PHONY: sanitize
 sanitize: BUILD_TYPE = sanitize
 sanitize: output-dirs
 sanitize: $(LIBRARIES)
-sanitize: $(EXAMPLES)
 
 # Pro Tip: DO NOT EVER run `rm -rf` (or similar) on a variable
 .PHONY: clean
@@ -208,30 +159,13 @@ shared-library-debug: shared-library-output-dirs $(SHARED_LIB)
 shared-library-sanitize: BUILD_TYPE = sanitize
 shared-library-sanitize: shared-library-output-dirs $(SHARED_LIB)
 
-### Examples ###
-
-.PHONY: examples
-examples: examples-$(DEFAULT_BUILD_TYPE)
-
-.PHONY: examples-release
-examples-release: BUILD_TYPE = release
-examples-release: example-output-dirs $(EXAMPLES)
-
-.PHONY: examples-debug
-examples-debug: BUILD_TYPE = debug
-examples-debug: example-output-dirs $(EXAMPLES)
-
-.PHONY: examples-sanitize
-examples-sanitize: BUILD_TYPE = sanitize
-examples-sanitize: example-output-dirs $(EXAMPLES)
-
 #### Library Build Rules #######################################################
 
 $(STATIC_LIB): $(STATIC_OBJS)
 	$(AR) crs $@ $^
 
 $(SHARED_LIB): $(SHARED_OBJS)
-	$(CC) -o $@ $^ -shared $(LDFLAGS)
+	$(CC) -o $@ $^ -shared $(LDFLAGS) $(LTOFLAGS)
 
 $(INTERMEDIATE_DIR)/%.static.o: $(SOURCE_DIR)/%.c $(HEADERS)
 	$(CC) -o $@ $< -c -I$(HEADER_DIR) $(STATIC_LIB_FLAGS) \
@@ -241,23 +175,12 @@ $(INTERMEDIATE_DIR)/%.shared.o: $(SOURCE_DIR)/%.c $(HEADERS)
 	$(CC) -o $@ $< -c -I$(HEADER_DIR) $(SHARED_LIB_FLAGS) \
 		$(CFLAGS) $(LTOFLAGS) $(SANITIZE_FLAGS) $(DEFINES)
 
-#### Examples Build Rules ######################################################
-
-$(EXAMPLE_BIN_DIR)/%$(EXEC_EXT): $(INTERMEDIATE_DIR)/%.example.o $(LIBRARIES)
-	$(CC) -o $@ $< \
-		$(EXAMPLE_LDFLAGS) $(SANITIZE_FLAGS) $(DEFINES)
-
-$(INTERMEDIATE_DIR)/%.example.o: $(EXAMPLE_SOURCE_DIR)/%.c $(EXAMPLE_HEADERS) $(HEADERS)
-	$(CC) -o $@ $< -c -I$(INCLUDE_DIR) \
-		$(EXAMPLE_CFLAGS) $(SANITIZE_FLAGS) $(DEFINES)
-
 #### Directory Build Rules #####################################################
 
 ### General ###
 
 .PHONY: output-dirs
 output-dirs: library-output-dirs
-output-dirs: example-output-dirs
 
 %/:
 	$(call MKDIR_P,"$@")
@@ -273,28 +196,7 @@ static-library-output-dirs: $(LIB_DIR)/ $(INTERMEDIATE_DIR)/
 .PHONY: shared-library-output-dirs
 shared-library-output-dirs: $(LIB_DIR)/ $(INTERMEDIATE_DIR)/
 
-### Examples ###
+#### Inclusions ################################################################
 
-.PHONY: example-output-dirs
-example-output-dirs: $(EXAMPLE_BIN_DIR)/ $(INTERMEDIATE_DIR)/
-
-#### Linux Installation ########################################################
-
-VERSION = $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
-VERSION_MAJOR = 1
-VERSION_MINOR = 0
-VERSION_PATCH = 1
-
-DEST_DIR = # root
-
-.PHONY: linux-install
-linux-install:
-	install -Dm755 "$(LIB_DIR)/lib$(NAME).so"       "$(DEST_DIR)/usr/lib/lib$(NAME).so.$(VERSION)"
-	ln -snf        "lib$(NAME).so.$(VERSION)"       "$(DEST_DIR)/usr/lib/lib$(NAME).so.$(VERSION_MAJOR)"
-	ln -snf        "lib$(NAME).so.$(VERSION_MAJOR)" "$(DEST_DIR)/usr/lib/lib$(NAME).so"
-	
-	find "$(HEADER_DIR)" -type f -exec install -Dm644 -t "$(DEST_DIR)/usr/include/$(NAME)/" "{}" \;
-	
-	install -Dm644 -t "$(DEST_DIR)/usr/lib/"                    "$(LIB_DIR)/lib$(NAME).a"
-	install -Dm644 -t "$(DEST_DIR)/usr/share/licenses/$(NAME)/" "LICENSE"
-	install -Dm644 -t "$(DEST_DIR)/usr/share/doc/$(NAME)/"      "README.md"
+include examples.mk
+include linux-install.mk
