@@ -49,9 +49,11 @@ int main(void)
 	ja_expect_eq(cstr, "deadbeef", "deadbeef");
 	ja_expect_eq(cstr, "deadbeef", "feedbeef"); // runtime warning
 
+#if !defined(__STDC_NO_COMPLEX__)
 	ja_expect_neq(double_complex, 2.0+1.5*I, 2.0+1.5*I); // runtime warning
 	ja_expect_neq(float_complex, 2.0f+1.5f*I, 2.0f+1.5f*I); // runtime warning
 	ja_expect_neq(long_double_complex, 2.0l+1.5l*I, 2.0l+1.5l*I); // runtime warning
+#endif
 
 	struct tm local_tz_time = *localtime(&(time_t){ time(NULL) });
 	struct tm utc_time = *gmtime(&(time_t){ time(NULL) });
