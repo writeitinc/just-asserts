@@ -1,0 +1,10 @@
+prefix=/usr
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: just-asserts
+Description: Flexible and extensible assertion library.
+URL: https://github.com/writeitinc/just-asserts.git
+Version: 1.0.1
+Libs: -L${libdir} -ljust-asserts
+Cflags: -I${includedir} -D_POSIX_C_SOURCE
