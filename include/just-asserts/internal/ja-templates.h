@@ -141,7 +141,7 @@
 #define JA_FMT_ARGS_ptr(v) (void *)(v)
 
 #if !defined(JA_DONT_INCLUDE_STD_HEADERS)
-# include <string.h>
+# include <string.h> // IWYU pragma: export
 #endif
 #define JA_TYPE_cstr const char *
 #define JA_COMPARE_cstr(a, OP, b) (strcmp(a, b) OP 0)
@@ -181,7 +181,7 @@
 
 #if !defined(__STDC_NO_COMPLEX__)
 # if !defined(JA_DONT_INCLUDE_STD_HEADERS)
-#  include <complex.h>
+#  include <complex.h> // IWYU pragma: export
 # endif
 
 # define JA_TYPE_float_complex float _Complex
