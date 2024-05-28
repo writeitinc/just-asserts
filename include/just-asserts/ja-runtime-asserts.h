@@ -206,17 +206,14 @@ JA_EXPORT void ja__cmp_fail(JACheckType check_type, JALineTrace trace, JACompari
 #ifdef JA_IMPLEMENTATION
 
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
+
+#include "internal/ja-report.h"
 
 static void mem_eq_fail(JACheckType check_type, JALineTrace trace,
 		const void *a, const void *b, size_t len, size_t failed_idx);
 
 static void report_line_trace(JACheckType check_type, JALineTrace trace);
-static void report(const char *str);
-static void reportf(const char *fmt, ...);
-static void reportf_va(const char *fmt, va_list va_args);
-static void report_char(int c);
 
 static const char *FAILURE_DESCRIPTIONS[] = {
 	[JA__ASSERTION] = "Failed assertion",
@@ -255,9 +252,9 @@ void ja__fail(JACheckType check_type, JALineTrace trace, const char *fmt, ...)
 
 	report_line_trace(check_type, trace);
 
-	report_char('\t');
-	reportf_va(fmt, va_args);
-	report_char('\n');
+	ja__report_char('\t');
+	ja__reportf_va(fmt, va_args);
+	ja__report_char('\n');
 
 	va_end(va_args);
 
@@ -277,18 +274,22 @@ void ja__cmp_fail(JACheckType check_type, JALineTrace trace, JAComparisonType cm
 	va_start(va_args, expr_b_str);
 
 	report_line_trace(check_type, trace);
-	reportf("\t%s for %s of type `%s`\n", FAILURE_DESCRIPTIONS[check_type],
-			COMPARISON_TYPE_STR[cmp_type], type_str);
+	ja__reportf("\t%s for %s of type ",
+			FAILURE_DESCRIPTIONS[check_type], COMPARISON_TYPE_STR[cmp_type]);
+	ja__reportf_colored(JA_COLOR_LIGHT_GREEN,
+			"`%s`\n", type_str);
 
-	// "        Assertion: (<expr_a>) <op> (<expr_b>)"
-	// "               ==> (<res_a>) <op> (<res_b>)"
-	reportf("\tAssertion: %s %s %s\n", expr_a_str, op_str, expr_b_str);
-	report_char('\t');
-	report("       ==> ");
-	reportf_va(type_fmt, va_args);
-	reportf(" %s ", op_str);
-	reportf_va(type_fmt, va_args);
-	report_char('\n');
+	// "        Failed Comparison: (<expr_a>) <op> (<expr_b>)"
+	// "                       ==> (<res_a>) <op> (<res_b>)"
+	ja__report_colored(JA_COLOR_LIGHT_RED, "\tFailed Comparison: ");
+	ja__reportf_colored(JA_COLOR_LIGHT_MAGENTA, "%s", expr_a_str);
+	ja__reportf_colored(JA_COLOR_DARK_RED, " %s ", op_str);
+	ja__reportf_colored(JA_COLOR_LIGHT_MAGENTA, "%s\n", expr_b_str);
+	ja__report_colored(JA_COLOR_LIGHT_RED, "\t               ==> ");
+	ja__reportf_va_colored(JA_COLOR_LIGHT_MAGENTA, type_fmt, va_args);
+	ja__reportf_colored(JA_COLOR_DARK_RED, " %s ", op_str);
+	ja__reportf_va_colored(JA_COLOR_LIGHT_MAGENTA, type_fmt, va_args);
+	ja__report_char('\n');
 
 	va_end(va_args);
 
@@ -304,13 +305,17 @@ void mem_eq_fail(JACheckType check_type, JALineTrace trace,
 {
 	report_line_trace(check_type, trace);
 
-	reportf("\t%s for memory equality check of length %zu\n",
+	ja__reportf("\t%s for memory equality check of length %zu\n",
 			FAILURE_DESCRIPTIONS[check_type], len);
 
-	reportf("\tMismatch at index %zu (0x%hhx != 0x%hhx)\n",
-			failed_idx,
-			((const char *)a)[failed_idx],
-			((const char *)b)[failed_idx]);
+	ja__report("\tMismatch at ");
+	ja__reportf_colored(JA_COLOR_LIGHT_CYAN, "index %zu ", failed_idx);
+
+	ja__report_char('(');
+	ja__reportf_colored(JA_COLOR_LIGHT_MAGENTA, "0x%hhx", ((const char *)a)[failed_idx]);
+	ja__report_colored(JA_COLOR_DARK_RED, " != ");
+	ja__reportf_colored(JA_COLOR_LIGHT_MAGENTA, "0x%hhx", ((const char *)b)[failed_idx]);
+	ja__report(")\n");
 
 	if (check_type == JA__ASSERTION) {
 		exit(EXIT_FAILURE);
@@ -320,41 +325,22 @@ void mem_eq_fail(JACheckType check_type, JALineTrace trace,
 // Prints a line trace to `stderr` for an assertion or expectation.
 void report_line_trace(JACheckType check_type, JALineTrace trace)
 {
-	const char *CHECK_TYPE_DIAGNOSTIC_STR[] = {
+	const char *const CHECK_TYPE_DIAGNOSTIC_STR[] = {
 		[JA__ASSERTION] = "assert",
 		[JA__EXPECTATION] = "expect",
 	};
-	reportf("[ja:%s] <%s:%s:%u>\n", CHECK_TYPE_DIAGNOSTIC_STR[check_type],
+
+	const JAColor CHECK_TYPE_COLOR[] = {
+		[JA__ASSERTION] = JA_COLOR_LIGHT_RED,
+		[JA__EXPECTATION] = JA_COLOR_LIGHT_YELLOW,
+	};
+
+	ja__reportf_colored(CHECK_TYPE_COLOR[check_type],
+			"[ja:%s] ",
+			CHECK_TYPE_DIAGNOSTIC_STR[check_type]);
+	ja__reportf_colored(JA_COLOR_LIGHT_BLUE,
+			"<%s:%s:%u>\n",
 			trace.file, trace.func, trace.line);
-}
-
-// Prints a message to `stderr`.
-void report(const char *str)
-{
-	fputs(str, stderr);
-}
-
-// Prints a formatted message to `stderr`.
-void reportf(const char *fmt, ...)
-{
-	va_list va_args;
-	va_start(va_args, fmt);
-
-	reportf_va(fmt, va_args);
-
-	va_end(va_args);
-}
-
-// Prints a formatted message to `stderr`.
-void reportf_va(const char *fmt, va_list va_args)
-{
-	vfprintf(stderr, fmt, va_args);
-}
-
-// Prints a byte to `stderr`.
-void report_char(int c)
-{
-	putc(c, stderr);
 }
 
 #endif // JA_IMPLEMENTATION
