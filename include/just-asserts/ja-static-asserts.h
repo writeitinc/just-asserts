@@ -29,7 +29,7 @@
  * ```c
  * struct SomeStruct {
  * 	int i;
- * #ifdef JA_STATIC_ASSERT_IN_STRUCT_DECL
+ * #if defined(JA_STATIC_ASSERT_IN_STRUCT_DECL)
  * 	ja_static_assert(1);
  * #endif
  * };
