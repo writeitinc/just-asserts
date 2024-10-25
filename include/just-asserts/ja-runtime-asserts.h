@@ -347,6 +347,7 @@ void report_line_trace(JACheckType check_type, JALineTrace trace)
 
 #endif // ja_runtime_asserts_h
 
+// License (MIT):
 /*
  * Copyright 2024 shan <writeitinc99@gmail.com>
  *

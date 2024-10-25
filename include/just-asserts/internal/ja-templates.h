@@ -507,6 +507,7 @@ JAPossiblyEscapedChar ja_char_to_possibly_escaped_char(char c)
 
 #endif // ja_template_h
 
+// License (MIT):
 /*
  * Copyright 2024 shan <writeitinc99@gmail.com>
  *

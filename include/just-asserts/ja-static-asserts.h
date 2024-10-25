@@ -148,6 +148,7 @@ extern const char ja__static_assert_helper_array[1];
 
 #endif // just_asserts_static_asserts_h
 
+// License (MIT):
 /*
  * Copyright 2024 shan <writeitinc99@gmail.com>
  *

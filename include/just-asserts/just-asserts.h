@@ -23,6 +23,7 @@
 
 #endif // just_asserts_h
 
+// License (MIT):
 /*
  * Copyright 2024 shan <writeitinc99@gmail.com>
  *
