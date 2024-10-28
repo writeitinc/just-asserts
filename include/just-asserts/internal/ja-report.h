@@ -3,15 +3,6 @@
 
 #include <stdarg.h>
 
-#include "ja-export.h"
-
-typedef enum JAColorPolicy {
-	JA_COLOR_POLICY_NOT_SET = -1,
-	JA_COLOR_POLICY_NEVER   =  0,
-	JA_COLOR_POLICY_ALWAYS  =  1,
-	JA_COLOR_POLICY_AUTO    =  2,
-} JAColorPolicy;
-
 typedef enum JAColor {
 	JA_COLOR_NONE,
 	JA_COLOR_BLACK,
@@ -41,26 +32,12 @@ void ja__reportf_colored(JAColor color, const char *fmt, ...);
 void ja__reportf_va_colored(JAColor color, const char *fmt, va_list va_args);
 void ja__report_char_colored(JAColor color, int c);
 
-JA_EXPORT extern JAColorPolicy ja_color_policy;
-
 #ifdef JA_IMPLEMENTATION
 
-#include "ja-platform.h"
-
-#if defined(JA_PLATFORM_POSIX)
-# include <unistd.h>
-#elif defined(JA_PLATFORM_WINDOWS)
-# include <io.h>
-#endif
+#include "ja-color-policy.h"
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-JAColorPolicy ja_color_policy = JA_COLOR_POLICY_AUTO;
-
-static bool should_output_color(void);
 
 static const char *ANSI_COLOR_CODES[] = {
 	[JA_COLOR_NONE]          = "\033[00m",
@@ -113,7 +90,7 @@ void ja__report_char(int c)
 
 void ja__report_colored(JAColor color, const char *str)
 {
-	bool output_color = should_output_color();
+	bool output_color = ja_outputting_color();
 
 	if (output_color) {
 		ja__report(ANSI_COLOR_CODES[color]);
@@ -138,7 +115,7 @@ void ja__reportf_colored(JAColor color, const char *fmt, ...)
 
 void ja__reportf_va_colored(JAColor color, const char *fmt, va_list va_args)
 {
-	bool output_color = should_output_color();
+	bool output_color = ja_outputting_color();
 
 	if (output_color) {
 		ja__report(ANSI_COLOR_CODES[color]);
@@ -153,7 +130,7 @@ void ja__reportf_va_colored(JAColor color, const char *fmt, va_list va_args)
 
 void ja__report_char_colored(JAColor color, int c)
 {
-	bool output_color = should_output_color();
+	bool output_color = ja_outputting_color();
 
 	if (output_color) {
 		ja__report(ANSI_COLOR_CODES[color]);
@@ -164,45 +141,6 @@ void ja__report_char_colored(JAColor color, int c)
 	if (output_color) {
 		ja__report(ANSI_COLOR_CODES[JA_COLOR_NONE]);
 	}
-}
-
-bool should_output_color(void)
-{
-	JAColorPolicy env_policy = JA_COLOR_POLICY_NOT_SET;
-	const char *env_policy_str = getenv("JA_COLOR_POLICY");
-	if (env_policy_str != NULL) {
-		if (strcmp(env_policy_str, "always")
-				== 0) {
-			env_policy = JA_COLOR_POLICY_ALWAYS;
-		} else if (strcmp(env_policy_str, "never")
-				== 0) {
-			env_policy = JA_COLOR_POLICY_NEVER;
-		} else if (strcmp(env_policy_str, "auto")
-				== 0) {
-			env_policy = JA_COLOR_POLICY_AUTO;
-		}
-	}
-
-	if (env_policy == JA_COLOR_POLICY_ALWAYS) {
-		return true;
-	}
-
-	if (env_policy == JA_COLOR_POLICY_NEVER) {
-		return false;
-	}
-
-	if (ja_color_policy == JA_COLOR_POLICY_AUTO
-			|| env_policy == JA_COLOR_POLICY_AUTO) {
-#if defined(JA_PLATFORM_POSIX)
-		return isatty(fileno(stderr));
-#elif defined(JA_PLATFORM_WINDOWS)
-		return _isatty(_fileno(stderr));
-#else
-		return false;
-#endif
-	}
-
-	return (bool)ja_color_policy;
 }
 
 #endif // JA_IMPLEMENTATION

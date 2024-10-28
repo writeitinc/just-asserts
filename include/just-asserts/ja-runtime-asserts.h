@@ -16,6 +16,8 @@
 
 #include "internal/ja-export.h"
 #include "internal/ja-templates.h"
+
+#include "internal/ja-color-policy.h" // IWYU pragma: export
 #include "internal/ja-version.h" // IWYU pragma: export
 
 #ifdef JA_DEBUG
