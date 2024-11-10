@@ -1,6 +1,6 @@
 # just-asserts
 
-Structured tests are lame and complicated. Why not just use asserts?
+An assertion library that caters to some guy's tastes.
 
 ## Basic Usage
 Below is a summary of basic usage of this library. See the [examples](examples) directory for
