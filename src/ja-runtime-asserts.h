@@ -232,6 +232,7 @@ void ja__mem_eq(JACheckType check_type, JALineTrace trace,
 	for (size_t i = 0; i < len; ++i) {
 		if (a_bytes[i] != b_bytes[i]) {
 			mem_eq_fail(check_type, trace, a, b, len, i);
+			return;
 		}
 	}
 }
